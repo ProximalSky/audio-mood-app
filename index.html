@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zvuči li kako se osjeća?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: "Overglow"; src: url("Overglow.otf"), url("Overglow.ttf"); font-display: swap; }
+  :root { 
+    --ink:#f3eeff; --muted:#b9b0f2; --pink:#ff7de9; --cyan:#6fd8ff; --violet:#8b5cff;
+    --panel:rgba(16,10,58,.65); --border:rgba(190,150,255,.25);
+    --script:"Overglow","Kaushan Script","Brush Script MT",cursive; --sans:"Poppins",system-ui,"Segoe UI",sans-serif; 
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; color:var(--ink); font-family:var(--sans);
+    background: linear-gradient(180deg,#03031a 0%,#0b0a3c 38%,#271a78 72%,#7c3fb5 100%) fixed; }
+  
+  #space { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+    background: radial-gradient(60% 40% at 15% 8%, rgba(70,90,255,.4), transparent 70%),
+                radial-gradient(55% 40% at 88% 92%, rgba(236,110,255,.35), transparent 70%); }
+  .star { position:absolute; border-radius:50%; background:#fff; opacity:.4; }
+  
+  main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 40px; text-align: center; }
+  h1 { font-family:var(--script); font-weight:400; font-size:2.1rem; margin:0 0 16px; color:#f0a6ff; text-shadow:0 0 16px rgba(214,120,255,.75); }
+
+  .mtv-title-container { display:inline-block; margin:8px 0 2px; position:relative; }
+  .mtv-title { 
+    margin:0; font-family:var(--script); font-weight:400; font-size:clamp(2.4rem, 6vw, 3.8rem); line-height:1.1;
+    background:linear-gradient(180deg,#ffd6f8 0%,#e48bff 55%,#a86bff 100%); 
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter: drop-shadow(0 0 18px rgba(214,120,255,.8)) drop-shadow(0 0 35px rgba(139,92,255,.6)); 
+  }
+
+  .sub { color:var(--muted); margin-bottom:8px; font-weight:500; font-size:1.1rem; }
+  .singer-profile { font-size:.82rem; color:#a9b8ff; letter-spacing:.07em; text-transform:uppercase; margin:2px 0 14px; min-height:1.2em; }
+
+  .setup, .spotify-player, .fact-card { 
+    background:var(--panel); border:1px solid var(--border); border-radius:18px; 
+    box-shadow:0 8px 32px rgba(0,0,0,.3); 
+  }
+  
+  .setup { display:grid; gap:12px; text-align:left; padding:18px; max-width:640px; margin:0 auto 20px; }
+  .setup label { font-size:.85rem; color:var(--muted); display:grid; gap:6px; }
+  .setup label.chk { display:flex; gap:8px; align-items:center; color:var(--ink); cursor:pointer; } .chk input { width:auto; }
+  summary { cursor:pointer; color:var(--muted); font-size:.9rem; margin-bottom:8px; }
+
+  .stage-grid { display:grid; grid-template-columns:1fr; gap:20px; text-align:center; }
+  @media (min-width: 880px) {
+    .stage-grid { grid-template-columns: 280px 1fr; text-align:left; align-items:start; }
+  }
+
+  .fact-card { padding:18px; text-align:left; font-size:.88rem; line-height:1.55; color:var(--ink); }
+  .fact-card h3 { margin:0 0 8px; font-size:1rem; color:#f0a6ff; font-family:var(--sans); display:flex; align-items:center; gap:6px; }
+  .fact-badge { font-size:.68rem; text-transform:uppercase; padding:2px 8px; border-radius:10px; background:rgba(255,125,233,.2); color:var(--pink); border:1px solid var(--pink); }
+
+  .main-stage { width:100%; position:relative; }
+  .legend { display:flex; justify-content:space-between; font-size:.9rem; margin:0 0 10px; font-weight:500; }
+  .legend i { display:inline-block; width:22px; height:4px; border-radius:2px; vertical-align:middle; margin-right:8px; box-shadow:0 0 8px currentColor; }
+  
+  .chart-container { position:relative; display:flex; gap:10px; align-items:stretch; }
+  svg { flex:1; height:auto; display:block; background:rgba(10,8,44,.65); border-radius:18px; border:1px solid var(--border); transform:translateZ(0); }
+  
+  .v-meter-wrap { 
+    width:16px; background:rgba(10,8,44,.65); border:1px solid var(--border); border-radius:10px; 
+    display:flex; flex-direction:column; justify-content:flex-end; padding:2px; position:relative; overflow:hidden;
+  }
+  .v-meter-fill { 
+    width:100%; height:4%; background:linear-gradient(0deg, var(--cyan), var(--pink)); 
+    border-radius:6px; transition:height .25s ease-out; 
+  }
+  .v-meter-label {
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-90deg);
+    font-size:0.6rem; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase; white-space:nowrap; pointer-events:none;
+  }
+
+  .axis { font-size:11px; fill:rgba(200,190,255,.65); }
+  .zone { font-size:11px; letter-spacing:.1em; fill:rgba(200,190,255,.75); font-weight:600; }
+  .pill { font-size:11px; letter-spacing:.1em; fill:#fff; font-weight:700; }
+  
+  .now { min-height:2.8em; margin:10px 0 2px; font-size:1.15rem; font-weight:500; line-height:1.4; color:#fff; text-align:center; }
+  .seg { font-style:normal; font-weight:600; background:linear-gradient(transparent 62%, rgba(255,125,233,.45) 0); }
+  
+  #layers { min-height:4.5em; margin-bottom:2px; }
+  .desc { font-size:.92rem; color:#c6b8ff; margin:2px 0 6px; font-weight:500; text-align:center; }
+  .lay { display:flex; align-items:center; gap:10px; font-size:.82rem; margin:3px 0; color:var(--muted); }
+  .lay span { width:120px; text-align:right; text-transform:capitalize; }
+  .lay i { flex:1; height:6px; background:rgba(255,255,255,.12); border-radius:3px; overflow:hidden; }
+  .lay b { display:block; height:100%; background:linear-gradient(90deg,#8b5cff,#ff7de9); border-radius:3px; }
+
+  .spotify-player { padding:10px 16px; margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .spotify-controls { display:flex; justify-content:center; }
+  .spotify-btn { width:42px; height:42px; border-radius:50%; border:0; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#8b5cff,#ff6ad5); transition:transform .1s; }
+  .spotify-btn:hover { transform:scale(1.05); }
+  .spotify-btn svg { width:18px; height:18px; fill:#fff; }
+  .spotify-progress-container { display:flex; align-items:center; gap:12px; }
+  .spotify-time { font-size:.75rem; color:var(--muted); min-width:35px; }
+  .spotify-bar { flex:1; height:6px; background:rgba(255,255,255,.18); border-radius:3px; position:relative; cursor:pointer; touch-action:none; }
+  .spotify-bar-fill { height:100%; width:0; background:linear-gradient(90deg,#6fd8ff,#ff7de9); border-radius:3px; position:relative; }
+  .spotify-bar-fill::after { content:''; position:absolute; right:-6px; top:50%; transform:translateY(-50%); width:12px; height:12px; background:#fff; border-radius:50%; }
+
+  input, textarea, button, select { font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:rgba(8,6,40,.6); color:var(--ink); width:100%; }
+  input[type=file] { background:none; border:0; padding:0; }
+  .langbar { text-align:right; margin-bottom:8px; } .langbar select { width:auto; }
+  button.action-btn { background:linear-gradient(135deg,#8b5cff 0%,#ff6ad5 100%); color:#fff; border:0; cursor:pointer; font-weight:700; transition:opacity .2s; }
+  button.action-btn:hover { opacity:.9; }
+  #status { font-size:.85rem; color:#ffb3f1; min-height:1.3em; font-weight:500; }
+  #stage[hidden] { display:none; }
+</style>
+</head>
+<body>
+<div id="space"><div id="stars"></div></div>
+<main>
+  <div class="langbar"><select id="lang"><option value="hr">Hrvatski</option><option value="en">English</option><option value="it">Italiano</option></select></div>
+  <h1 data-i="title"></h1>
+
+  <div class="setup" id="setup">
+    <label><span data-i="f1"></span><input type="file" id="audioFile" accept="audio/*"></label>
+    <label><span data-i="f2"></span><input id="q" data-ph="ph"></label>
+    <label class="chk"><input type="checkbox" id="deep" checked><span data-i="deep"></span></label>
+    <label class="chk"><input type="checkbox" id="gpu"><span data-i="gpu"></span></label>
+    <button id="go" class="action-btn" data-i="go"></button>
+    <select id="cands" hidden></select>
+    <div id="status"></div>
+    <details><summary data-i="manual"></summary>
+      <label><span data-i="fLrc"></span><input type="file" id="lrcFile" accept=".lrc,.txt"></label>
+      <label><span data-i="fText"></span><textarea id="lrcText" rows="4"></textarea></label>
+      <button id="mkPrompt" class="action-btn" data-i="mk"></button>
+      <label><span data-i="fScore"></span><textarea id="scoreText" rows="4"></textarea></label>
+    </details>
+  </div>
+
+  <section id="stage" hidden>
+    <div style="text-align:center;">
+      <div class="mtv-title-container"><h2 id="title" class="mtv-title"></h2></div>
+      <div class="sub" id="artist"></div>
+      <div class="singer-profile" id="singerProfile"></div>
+    </div>
+
+    <div class="stage-grid">
+      <div class="fact-card" id="factCard">
+        <h3>💡 <span data-i="factTitle">Zanimljivost</span> <span class="fact-badge" id="factType">Info</span></h3>
+        <div id="factText">Učitavam zanimljivosti o pjesmi i izvođaču...</div>
+      </div>
+
+      <div class="main-stage">
+        <div class="legend">
+          <span style="color:#6fd8ff"><i style="background:#6fd8ff"></i><span style="color:var(--ink)" data-i="lm"></span></span>
+          <span style="color:#ff7de9"><span style="color:var(--ink)" data-i="lw"></span><i style="background:#ff7de9;margin:0 0 0 8px"></i></span>
+        </div>
+
+        <div class="chart-container">
+          <svg id="chart" viewBox="0 0 700 400" role="img"></svg>
+          <div class="v-meter-wrap" title="Sinkronizacija riječi i zvuka">
+            <div class="v-meter-fill" id="vMeterFill"></div>
+            <div class="v-meter-label">SYNC</div>
+          </div>
+        </div>
+
+        <div class="now" id="now"></div>
+        <div id="layers"></div>
+
+        <div class="spotify-player">
+          <div class="spotify-controls">
+            <button class="spotify-btn" id="playBtn" aria-label="Play/Pause">
+              <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+          </div>
+          <div class="spotify-progress-container">
+            <span class="spotify-time" id="currTime">0:00</span>
+            <div class="spotify-bar" id="spotifyBar"><div class="spotify-bar-fill" id="spotifyFill"></div></div>
+            <span class="spotify-time" id="totalTime">0:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <audio id="player"></audio>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const I18N = {
+  hr: { title: "Zvuči li kako se osjeća?", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno (samo ako zatreba)", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
+    noFile: "Prvo odaberi mp3.", an: "Analiziram zvuk...", srch: "Tražim tekst...", none: "Nema teksta s vremenima.", noL: "Fali tekst s vremenima.", err: "Greška: ",
+    tags: (a, t) => `Iz datoteke: ${a || "?"} – ${t}`, noTags: "Nema metapodataka, koristim ime datoteke.", warn: d => `pazi: tekst odstupa ${d} s`, ptxt: "Prvo treba tekst.", pok: "Prompt kopiran.", pfb: "Kopiraj prompt iz polja.", pick: "Odabran drugi tekst. Klikni Analiziraj.",
+    mdl: (f, p) => `Skidam model ${f} ${p}%`, aMdl: "Skidam AI model...", aP: p => `AI analiza ${p}%...`, aFail: "AI analiza nije uspjela.", gpuFb: "GPU nedostupan, koristim CPU.", tP: (n, m) => `Analiza teksta ${n}/${m}...`,
+    tone: ["duboko mračno", "tmurno", "dvosmisleno", "toplo", "izrazito svijetlo"], str: ["tiho", "umjereno", "snažno"], val: ["mračno", "teško", "sjetno", "toplo", "svijetlo"], with: "s primjesom", vs: "Vokalni stil", voice: { male: "muški vokal", female: "ženski vokal", choir: "zbor", rap: "rep" }, dyn: ["ujednačena dinamika", "umjerena dinamika", "široka dinamika"] },
+  en: { title: "Does it sound the way it feels?", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
+    noFile: "Choose an mp3 first.", an: "Analyzing audio...", srch: "Searching lyrics...", none: "No timed lyrics found.", noL: "Timed lyrics missing.", err: "Error: ",
+    tags: (a, t) => `From file: ${a || "?"} – ${t}`, noTags: "No tags found.", warn: d => `differs by ${d} s`, ptxt: "Timed lyrics needed.", pok: "Prompt copied.", pfb: "Copy prompt from box.", pick: "Selected. Click Analyze.",
+    mdl: (f, p) => `Downloading ${f} ${p}%`, aMdl: "Downloading model...", aP: p => `AI audio analysis ${p}%...`, aFail: "AI analysis failed.", gpuFb: "Using CPU.", tP: (n, m) => `Analyzing lyrics ${n}/${m}...`,
+    tone: ["deeply dark", "gloomy", "ambiguous", "warm", "radiantly bright"], str: ["quietly", "moderately", "intensely"], val: ["dark", "heavy", "melancholic", "warm", "bright"], with: "with a hint of", vs: "Vocal style", voice: { male: "male vocal", female: "female vocal", choir: "choir", rap: "rap" }, dyn: ["even dynamics", "moderate dynamics", "wide dynamics"] },
+  it: { title: "Suona come si sente?", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
+    noFile: "Scegli prima un mp3.", an: "Analizzo l'audio...", srch: "Cerco il testo...", none: "Nessun testo trovato.", noL: "Manca il testo.", err: "Errore: ",
+    tags: (a, t) => `Dal file: ${a || "?"} – ${t}`, noTags: "Nessun tag.", warn: d => `differisce di ${d} s`, ptxt: "Serve prima il testo.", pok: "Prompt copiato.", pfb: "Copia il prompt.", pick: "Altra versione scelta. Premi Analizza.",
+    mdl: (f, p) => `Scarico ${f} ${p}%`, aMdl: "Scarico modello...", aP: p => `Analisi AI ${p}%...`, aFail: "Analisi fallita.", gpuFb: "Uso CPU.", tP: (n, m) => `Analisi testo ${n}/${m}...`,
+    tone: ["profondamente cupo", "cupo", "ambiguo", "caldo", "radioso"], str: ["piano", "moderatamente", "intensamente"], val: ["cupo", "pesante", "malinconico", "caldo", "luminoso"], with: "con un tocco di", vs: "Stile vocale", voice: { male: "voce maschile", female: "voce femminile", choir: "coro", rap: "rap" }, dyn: ["dinamica uniforme", "dinamica moderata", "dinamica ampia"] }
+};
+let LANG = localStorage.getItem("mood.lang") || (navigator.language || "en").slice(0, 2);
+if (!I18N[LANG]) LANG = "en";
+const T = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.en[k]; return typeof v === "function" ? v(...a) : v; };
+function applyLang() {
+  document.documentElement.lang = LANG; $("lang").value = LANG;
+  document.querySelectorAll("[data-i]").forEach(e => { e.textContent = T(e.dataset.i); });
+  document.querySelectorAll("[data-ph]").forEach(e => { e.placeholder = T(e.dataset.ph); });
+  shownLine = null; shownNow = null; if (D) { $("artist").textContent = subLine(); $("singerProfile").textContent = profileLine(); } if (D && !$("stage").hidden) draw();
+}
+$("lang").onchange = e => { LANG = e.target.value; localStorage.setItem("mood.lang", LANG); applyLang(); };
+
+/* NORMALIZACIJA HRVATSKIH DIJAKRITIKA ZA PRETRAGU TEKSTA (š, ć, č, ž, đ) */
+function normalizeText(str) {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d").replace(/Đ/g, "D")
+            .replace(/š/g, "s").replace(/Š/g, "S")
+            .replace(/ć/g, "c").replace(/Ć/g, "C")
+            .replace(/č/g, "c").replace(/Č/g, "C")
+            .replace(/ž/g, "z").replace(/Ž/g, "Z");
+}
+
+const NS = "http://www.w3.org/2000/svg";
+const W = 700, H = 400, PAD = 8, WINDOW = 30, HEAD = 0.72;
+let D = null, audioReady = false, AF = null;
+
+const player = $("player"), playBtn = $("playBtn"), spotifyBar = $("spotifyBar");
+playBtn.onclick = () => { if (player.paused) player.play(); else player.pause(); };
+player.addEventListener("play", () => { $("playIcon").style.display = "none"; $("pauseIcon").style.display = "block"; });
+player.addEventListener("pause", () => { $("playIcon").style.display = "block"; $("pauseIcon").style.display = "none"; });
+player.addEventListener("loadedmetadata", () => { $("totalTime").textContent = fmt(player.duration); });
+
+const seekTo = e => { const r = spotifyBar.getBoundingClientRect(), p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)); if (player.duration) { player.currentTime = p * player.duration; draw(); } };
+let dragging = false;
+spotifyBar.onpointerdown = e => { dragging = true; spotifyBar.setPointerCapture(e.pointerId); seekTo(e); };
+spotifyBar.onpointermove = e => { if (dragging) seekTo(e); };
+spotifyBar.onpointerup = () => { dragging = false; };
+
+const ST = {};
+const setSt = (k, s) => { ST[k] = s; $("status").textContent = Object.values(ST).filter(Boolean).join("  •  "); };
+const status = s => { for (const k in ST) ST[k] = ""; $("status").textContent = s; };
+let lastQ = null, CANDS = [];
+
+function parseLRC(t) {
+  const r = [];
+  for (const line of t.split("\n")) {
+    const m = line.trim().match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)/);
+    if (m && m[3].trim()) r.push({ t: +(parseInt(m[1]) * 60 + parseFloat(m[2])).toFixed(2), text: m[3].trim() });
+  }
+  return r;
+}
+
+function cleanName(n) {
+  return n.replace(/\.[^.]+$/, "").replace(/\[[^\]]*\]|\([^)]*\)/g, " ").replace(/_/g, " ").replace(/^\s*\d{2}\s*[-._)]*\s+/, "")
+    .replace(/\b(HQ|HD|official|video|audio|lyrics|lyric|remastered|music)\b/gi, " ")
+    .replace(/\s+-\s+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+let TAGS = {}, AUTOQ = "";
+async function readTags(file) {
+  const out = {};
+  try {
+    const head = new Uint8Array(await file.slice(0, 10).arrayBuffer());
+    if (String.fromCharCode(...head.slice(0, 3)) === "ID3") {
+      const ver = head[3], size = (head[6] << 21) | (head[7] << 14) | (head[8] << 7) | head[9];
+      const b = new Uint8Array(await file.slice(10, 10 + Math.min(size, 3e6)).arrayBuffer());
+      const idLen = ver === 2 ? 3 : 4, hLen = ver === 2 ? 6 : 10;
+      for (let p = 0; p + hLen < b.length;) {
+        const id = String.fromCharCode(...b.slice(p, p + idLen));
+        if (!/^[A-Z0-9]+$/.test(id)) break;
+        const sz = ver === 2 ? (b[p + 3] << 16) | (b[p + 4] << 8) | b[p + 5]
+          : ver === 4 ? (b[p + 4] << 21) | (b[p + 5] << 14) | (b[p + 6] << 7) | b[p + 7]
+          : (b[p + 4] << 24) | (b[p + 5] << 16) | (b[p + 6] << 8) | b[p + 7];
+        const key = { TIT2: "title", TT2: "title", TPE1: "artist", TP1: "artist", TPE2: "artist2" }[id];
+        const body = b.slice(p + hLen, p + hLen + sz);
+        if (key && body.length > 1) {
+          const enc = body[0], data = body.slice(1);
+          const label = enc === 1 ? (data[0] === 0xFE && data[1] === 0xFF ? "utf-16be" : "utf-16le") : enc === 2 ? "utf-16be" : enc === 3 ? "utf-8" : "windows-1252";
+          out[key] = new TextDecoder(label).decode(data).replace(/\0/g, "").trim();
+        }
+        p += hLen + sz;
+      }
+    }
+  } catch {}
+  out.artist = out.artist || out.artist2 || "";
+  return out;
+}
+
+$("audioFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  AF = f; $("player").src = URL.createObjectURL(f); audioReady = true;
+  $("lrcText").value = ""; $("cands").hidden = true; lastQ = null;
+  TAGS = await readTags(f);
+  AUTOQ = TAGS.title ? `${TAGS.artist} ${TAGS.title}`.trim() : cleanName(f.name);
+  $("q").value = AUTOQ;
+  status(TAGS.title ? T("tags", TAGS.artist, TAGS.title) : T("noTags"));
+};
+
+const tmo = (u, ms = 7000) => { const c = new AbortController(); setTimeout(() => c.abort(), ms); return fetch(u, { signal: c.signal }).then(r => (r.ok ? r.json() : null)).catch(() => null); };
+
+async function metaCandidates(q, dur) {
+  const normQ = normalizeText(q);
+  const enc = encodeURIComponent(q), encNorm = encodeURIComponent(normQ);
+  const out = [];
+  const [it, mb, itN] = await Promise.all([
+    tmo(`https://itunes.apple.com/search?term=${enc}&media=music&entity=song&limit=8`),
+    tmo(`https://musicbrainz.org/ws/2/recording?query=${encNorm}&fmt=json&limit=8`),
+    q !== normQ ? tmo(`https://itunes.apple.com/search?term=${encNorm}&media=music&entity=song&limit=8`) : null
+  ]);
+  
+  [it, itN].forEach(res => {
+    ((res && res.results) || []).forEach(x => out.push({ artist: x.artistName, title: x.trackName, d: (x.trackTimeMillis || 0) / 1000 }));
+  });
+  ((mb && mb.recordings) || []).forEach(x => out.push({ artist: ((x["artist-credit"] || [])[0] || {}).name || "", title: x.title, d: (x.length || 0) / 1000 }));
+  
+  return out.filter(c => c.title).sort((a, b) => Math.abs((a.d || 1e3) - dur) - Math.abs((b.d || 1e3) - dur));
+}
+
+async function searchLyrics(q, dur) {
+  const pairs = [], seen = new Set();
+  const add = (artist, title) => { 
+    const k = `${artist}|${title}`.toLowerCase(); 
+    if (title && !seen.has(k)) { 
+      seen.add(k); 
+      pairs.push({ track_name: title, ...(artist ? { artist_name: artist } : {}) }); 
+      
+      const normArtist = normalizeText(artist), normTitle = normalizeText(title);
+      const kn = `${normArtist}|${normTitle}`.toLowerCase();
+      if (!seen.has(kn)) {
+        seen.add(kn);
+        pairs.push({ track_name: normTitle, ...(normArtist ? { artist_name: normArtist } : {}) });
+      }
+    } 
+  };
+  if (TAGS.title && q === AUTOQ) add(TAGS.artist, TAGS.title);
+  (await metaCandidates(q, dur)).slice(0, 6).forEach(c => add(c.artist, c.title));
+  pairs.push({ q });
+  if (q !== normalizeText(q)) pairs.push({ q: normalizeText(q) });
+
+  const res = await Promise.all(pairs.map(p => tmo("https://lrclib.net/api/search?" + new URLSearchParams(p), 9000)));
+  const all = new Map(); res.forEach(list => (list || []).forEach(x => { if (x.syncedLyrics) all.set(x.id, x); }));
+  const words = normalizeText(q).toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const cost = x => { 
+    const name = normalizeText(`${x.artistName} ${x.trackName}`).toLowerCase(); 
+    return Math.abs(x.duration - dur) + (1 - (words.length ? words.filter(w => name.includes(w)).length / words.length : 1)) * 20; 
+  };
+  return [...all.values()].sort((a, b) => cost(a) - cost(b));
+}
+
+async function fetchFunFact(artist, title) {
+  const apiKey = "b25b959554ed76058ac220b7b2e0a026";
+  $("factText").textContent = "Tražim zanimljivosti...";
+  const cleanA = normalizeText(artist), cleanT = normalizeText(title);
+  
+  try {
+    if (title && artist) {
+      const trackData = await tmo(`https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${apiKey}&artist=${encodeURIComponent(cleanA)}&track=${encodeURIComponent(cleanT)}&format=json`);
+      if (trackData && trackData.track && trackData.track.wiki && trackData.track.wiki.summary) {
+        let text = trackData.track.wiki.summary.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '').trim();
+        if (text.length > 10) {
+          $("factType").textContent = "Pjesma";
+          $("factText").textContent = text;
+          return;
+        }
+      }
+    }
+
+    if (artist) {
+      const artistData = await tmo(`https://ws.audioscrobbler.com/2.0/?method=artist.getInfo&api_key=${apiKey}&artist=${encodeURIComponent(cleanA)}&format=json`);
+      if (artistData && artistData.artist && artistData.artist.bio && artistData.artist.bio.summary) {
+        let text = artistData.artist.bio.summary.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '').trim();
+        if (text.length > 10) {
+          $("factType").textContent = "Izvođač";
+          $("factText").textContent = text;
+          return;
+        }
+      }
+    }
+    
+    $("factType").textContent = "Info";
+    $("factText").textContent = "Nema dostupnih dodatnih informacija za ovu pjesmu ili izvođača.";
+  } catch (e) {
+    $("factType").textContent = "Info";
+    $("factText").textContent = "Nije moguće učitati zanimljivosti u ovom trenutku.";
+  }
+}
+
+$("lrcFile").onchange = async e => { const f = e.target.files[0]; if (f) $("lrcText").value = await f.text(); };
+$("cands").onchange = () => { $("lrcText").value = CANDS[$("cands").value].syncedLyrics; status(T("pick")); };
+
+const WORKER_SRC = [
+  'import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";',
+  'env.allowLocalModels = false;',
+  'const cache = {};',
+  'self.onmessage = async ({ data }) => {',
+  '  const { id, task, model, input, opts } = data;',
+  '  try {',
+  '    const key = task + model;',
+  '    if (!cache[key]) cache[key] = await pipeline(task, model, { progress_callback: p => self.postMessage({ progress: p }) });',
+  '    self.postMessage({ id, out: await cache[key](input, opts) });',
+  '  } catch (e) { self.postMessage({ id, error: String((e && e.message) || e) }); }',
+  '};'
+].join("\n");
+
+const AUDIO_SRC = [
+  'import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.1.2";',
+  'env.allowLocalModels = false;',
+  'const cache = {};',
+  'const pg = p => self.postMessage({ progress: p });',
+  'async function get(task, model, gpu) {',
+  '  const key = task + model + gpu;',
+  '  if (!cache[key]) {',
+  '    try { cache[key] = await pipeline(task, model, gpu ? { device: "webgpu", dtype: "fp32", progress_callback: pg } : { progress_callback: pg }); }',
+  '    catch (e) { if (!gpu) throw e; self.postMessage({ note: "gpuFb" }); cache[key] = await pipeline(task, model, { progress_callback: pg }); }',
+  '  }',
+  '  return cache[key];',
+  '}',
+  'self.onmessage = async ({ data }) => {',
+  '  const { id, task, model, input, opts, gpu } = data;',
+  '  try { const p = await get(task, model, gpu); self.postMessage({ id, out: await p(input, opts ? { top_k: opts.topk } : {}) }); }',
+  '  catch (e) { self.postMessage({ id, error: String((e && e.message) || e) }); }',
+  '};'
+].join("\n");
+
+let WID = 0; const WP = {}, WKS = {};
+function workerCall(task, model, input, opts, gpu) {
+  const lane = task === "audio-classification" ? "a" : model.includes("emotions") ? "e" : "t";
+  if (!WKS[lane]) {
+    const w = WKS[lane] = new Worker(URL.createObjectURL(new Blob([lane === "a" ? AUDIO_SRC : WORKER_SRC], { type: "text/javascript" })), { type: "module" });
+    w.onmessage = ({ data }) => {
+      if (data.note) { setSt(lane, T(data.note)); return; }
+      if (data.progress) { const p = data.progress; if (p.status === "progress") setSt(lane, T("mdl", (p.file || "").split("/").pop(), Math.round(p.progress || 0))); return; }
+      const r = WP[data.id]; if (!r) return; delete WP[data.id];
+      data.error ? r.rej(new Error(data.error)) : r.res(data.out);
+    };
+    w.onerror = e => { for (const id in WP) { WP[id].rej(new Error(e.message || "worker error")); delete WP[id]; } };
+  }
+  return new Promise((res, rej) => { const id = ++WID; WP[id] = { res, rej }; WKS[lane].postMessage({ id, task, model, input, opts, gpu }); });
+}
+
+/* OBOGAĆENI EMOCIONALNI RJEČNIK BEZ NEODREĐENIH STUPOVA */
+const EMO = {
+  hr: { admiration: "divljenje", amusement: "zabava", anger: "ljutnja", annoyance: "iritacija", approval: "odobravanje", caring: "briga", confusion: "zbunjenost", curiosity: "znatiželja", desire: "želja", disappointment: "razočaranje", disapproval: "neodobravanje", disgust: "gađenje", embarrassment: "nelagoda", excitement: "uzbuđenje", fear: "strah", gratitude: "zahvalnost", grief: "žalost", joy: "radost", love: "ljubav", nervousness: "nemir", optimism: "optimizam", pride: "ponos", realization: "spoznaja", relief: "olakšanje", remorse: "kajanje", sadness: "tuga", surprise: "iznenađenje", longing: "čežnja", pain: "bol", nostalgia: "nostalgija" }
+};
+const emoName = k => (EMO[LANG] || {})[k] || k;
+const EMO_W = { admiration: .7, amusement: .7, anger: -.8, annoyance: -.4, approval: .4, caring: .5, confusion: -.3, curiosity: .2, desire: .3, disappointment: -.7, disapproval: -.4, disgust: -.7, embarrassment: -.4, excitement: .7, fear: -.7, gratitude: .8, grief: -.95, joy: .9, love: .9, nervousness: -.4, optimism: .7, pride: .6, realization: .1, relief: .5, remorse: -.8, sadness: -.9, surprise: .1, longing: -.6, pain: -.85, nostalgia: -.5 };
+const isEnglish = t => { const w = t.toLowerCase().match(/[a-z']+/g) || [], sw = new Set(["the", "you", "and", "my", "your", "of", "it", "is", "that", "we", "for", "with", "all", "be", "in", "this", "are", "don't", "i'm"]); return w.length > 0 && w.filter(x => sw.has(x)).length / w.length > 0.15; };
+
+function describe(s, inten, em) {
+  const tone = T("tone")[s > .55 ? 4 : s > .2 ? 3 : s > -.2 ? 2 : s > -.55 ? 1 : 0], str = T("str")[inten > .66 ? 2 : inten > .33 ? 1 : 0];
+  return `${tone}, ${str}` + (em.length ? ` · ${emoName(em[0][0])}` + (em[1] ? ` ${T("with")}: ${em.slice(1).map(e => emoName(e[0])).join(", ")}` : "") : "");
+}
+const valWord = s => T("val")[s > .55 ? 4 : s > .15 ? 3 : s > -.15 ? 2 : s > -.55 ? 1 : 0];
+
+/* PRECIZNIJE I RAZVRSTANIJE OZNAČAVANJE BEZ 'NEODREĐENO' */
+const lineLabel = l => {
+  if (!l) return "";
+  if (l.em && l.em[0] && l.em[0][0] !== "neutral") return emoName(l.em[0][0]);
+  if (l.label && l.label.toLowerCase() !== "neodređeno" && l.label.toLowerCase() !== "mixed") return l.label;
+  return valWord(l.s);
+};
+
+const lineDesc = l => (l ? describe(l.s, l.inten == null ? Math.min(1, Math.abs(l.s)) : l.inten, l.em || []) : "");
+
+async function scoreMany(task, model, arr, opts) {
+  const uniq = [...new Set(arr)].sort((a, b) => a.length - b.length), got = new Map(), main = !model.includes("emotions");
+  for (let i = 0; i < uniq.length; i += 16) {
+    if (main) setSt("t", T("tP", Math.min(i + 16, uniq.length), uniq.length));
+    const part = uniq.slice(i, i + 16), out = await workerCall(task, model, part, opts);
+    part.forEach((t, j) => got.set(t, out[j]));
+  }
+  return arr.map(t => got.get(t));
+}
+
+const DL = { Shout: 1, Yell: 1, Screaming: 1, Bellow: .6, Whispering: -1 };
+const VT = { "Male singing": "male", "Female singing": "female", "Child singing": "female", Choir: "choir", Rapping: "rap" };
+
+/* PRECIZNO SJEČENJE STIHOVA S BRŽIM KLIZANJEM PO FRAZAMA */
+function splitLine(text, en) {
+  const ws = [...text.matchAll(/\S+/g)].map(m => ({ s: m.index, e: m.index + m[0].length, w: m[0], lw: m[0].toLowerCase().replace(/[^\p{L}']/gu, "") }));
+  if (ws.length <= 3) return [text];
+  
+  let parts = [], cur = [];
+  for (let i = 0; i < ws.length; i++) {
+    cur.push(ws[i]);
+    if (/[,;:…!?.]$/.test(ws[i].w) || cur.length >= 3 || i === ws.length - 1) {
+      parts.push(cur);
+      cur = [];
+    }
+  }
+  if (cur.length) parts.push(cur);
+  return parts.map(g => text.slice(g[0].s, g[g.length - 1].e));
+}
+
+const mixEmoW = parts => { const m = {}; parts.forEach(([a, w]) => a.forEach(x => { if (x.label !== "neutral") m[x.label] = (m[x.label] || 0) + w * x.score; })); return Object.entries(m).sort((x, y) => y[1] - x[1]); };
+
+async function autoScore(L) {
+  const en = isEnglish(L.map(l => l.text).join(" "));
+  const lines = L.map(l => l.text), ctxs = L.map((_, i) => [L[i - 1], L[i], L[i + 1]].filter(Boolean).map(l => l.text).join(". "));
+  const parts = L.map(l => splitLine(l.text, en)), segTexts = parts.flat();
+  const M1 = "Xenova/bert-base-multilingual-uncased-sentiment", M2 = "Xenova/distilbert-base-uncased-finetuned-sst-2-english", ME = "Cohee/distilbert-base-uncased-go-emotions-onnx";
+  const starV = o => (o.reduce((a, x) => a + parseInt(x.label) * x.score, 0) - 3) / 2;
+  const one = o => { const r = Array.isArray(o) ? o[0] : o; return (r.label === "POSITIVE" ? 1 : -1) * (r.score - 0.5) * 2; };
+  
+  const stars = async arr => {
+    try { return (await scoreMany("text-classification", M1, arr, { topk: 5 })).map(starV); }
+    catch (e) { return (await scoreMany("sentiment-analysis", M2, arr)).map(one); }
+  };
+  
+  const starsP = (async () => ({ l: await stars(lines), c: await stars(ctxs), s: await stars(segTexts) }))();
+  const emoP = (async () => {
+    try { const g = a => scoreMany("text-classification", ME, a, { topk: 28 }); return { l: await g(lines), c: await g(ctxs), s: await g(segTexts) }; }
+    catch (e) { return null; }
+  })();
+
+  const [sv, emo] = await Promise.all([starsP, emoP]);
+  const out = []; let k = 0;
+  
+  L.forEach((l, i) => {
+    const next = L[i + 1] ? L[i + 1].t : l.t + 3.5, gap = Math.max(0.8, next - l.t);
+    const segs = parts[i];
+    const segDur = gap / segs.length;
+
+    segs.forEach((p, j) => {
+      const idx = k++, base = 0.5 * sv.s[idx] + 0.3 * sv.l[i] + 0.2 * sv.c[i];
+      let v = base, inten = Math.min(1, Math.abs(base) * 1.6), top = [];
+      if (emo) {
+        const e = mixEmoW([[emo.s[idx], 0.5], [emo.l[i], 0.3], [emo.c[i], 0.2]]), mass = e.reduce((a, [, q]) => a + q, 0);
+        const ev = e.reduce((a, [kk, q]) => a + q * (EMO_W[kk] || 0), 0) / (mass + 0.1);
+        v = 0.4 * base + 0.6 * ev; inten = Math.min(1, (e[0] ? e[0][1] : 0) * 1.5); top = e.slice(0, 3).filter(x => x[1] > 0.02);
+      }
+      out.push({ t: +(l.t + j * segDur).toFixed(2), dur: +segDur.toFixed(2), text: p, line: l.text, v, inten, top });
+    });
+  });
+
+  const mx = Math.max(...out.map(r => Math.abs(r.v))) || 1;
+  return out.map(r => ({ t: r.t, dur: r.dur, text: r.text, line: r.line, s: +(r.v / mx * 0.85).toFixed(2), inten: +r.inten.toFixed(2), em: r.top.map(([kk, q]) => [kk, +q.toFixed(2)]) }));
+}
+
+$("go").onclick = async () => {
+  try {
+    if (!AF) return status(T("noFile"));
+    const q = $("q").value.trim(), deep = $("deep").checked, key = `mood6|${AF.name}|${AF.size}|${q}|${deep}`;
+    try { const c = JSON.parse(localStorage.getItem(key)); if (c && c.music) { D = c; status(""); return tryStart(); } } catch {}
+    setSt("a", T("an"));
+    const side = async dur => {
+      let L, note = "", c = null;
+      const manual = $("lrcText").value.trim();
+      if (manual) L = parseLRC(manual);
+      else {
+        setSt("t", T("srch"));
+        CANDS = await searchLyrics(q, dur);
+        if (!CANDS.length) throw new Error(T("none"));
+        c = CANDS[0]; L = parseLRC(c.syncedLyrics);
+        $("cands").innerHTML = CANDS.map((x, i) => `<option value="${i}">${x.artistName} – ${x.trackName} (${fmt(x.duration)})</option>`).join("");
+        $("cands").hidden = CANDS.length < 2;
+        const diff = Math.round(Math.abs(c.duration - dur));
+        note = diff > 4 ? T("warn", diff) : "";
+      }
+      if (!L.length) throw new Error(T("noL"));
+      const raw = $("scoreText").value;
+      let lyrics;
+      if (raw.includes("[")) {
+        const by = {}; JSON.parse(raw.slice(raw.indexOf("["), raw.lastIndexOf("]") + 1)).forEach(a => { by[a.i] = a; });
+        lyrics = L.map((l, i) => { const a = by[i] || {}; return { ...l, line: l.text, s: Math.max(-1, Math.min(1, +a.s || 0)), label: a.label || "", inten: a.inten, em: a.em }; });
+      } else lyrics = await autoScore(L);
+      return { lyrics, c, note };
+    };
+    const { music, duration, profile, side: sd } = await analyzeAudio(AF, deep, side);
+    const lyrics = sd.lyrics;
+    D = { title: sd.c ? sd.c.trackName : q, artist: sd.c ? sd.c.artistName : "", note: sd.note, profile, duration, music, lyrics, sync: 0, split_t: 0 };
+    let sum = 0, n = 0, best = 0, bt = 0;
+    for (let s = lyrics[0].t; s < duration; s++) { const d = Math.abs(musicAt(s).v - lyricVal(s)); sum += d; n++; if (d > best) { best = d; bt = s; } }
+    D.sync = 1 - sum / n / 2; D.split_t = bt;
+    try { localStorage.setItem(key, JSON.stringify(D)); } catch {}
+    status(""); tryStart();
+  } catch (e) { status(T("err") + (e && e.message ? e.message : e)); }
+};
+
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const a = i + k, b = a + len / 2, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+}
+
+/* REKALIBRIRANA AUDIO ANALIZA TONA ("KAKO ZVUČI") ZA BALADE I TUŽNE PJESME */
+async function analyzeAudio(file, deep, onReady) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+  const buf = await ctx.decodeAudioData(await file.arrayBuffer()); ctx.close();
+  const sr = buf.sampleRate, ch = new Float32Array(buf.length);
+  for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < ch.length; i++) ch[i] += d[i] / buf.numberOfChannels; }
+  const N = 1024, hop = Math.round(sr * 0.5), C = [], E = [], TS = [];
+  for (let s = 0; s + hop <= ch.length; s += hop) {
+    const o = s + (hop - N) / 2 | 0, re = new Float64Array(N), im = new Float64Array(N);
+    for (let i = 0; i < N; i++) re[i] = ch[o + i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N));
+    fft(re, im);
+    let num = 0, den = 0; for (let b = 1; b < N / 2; b++) { const m = Math.hypot(re[b], im[b]); num += b * m; den += m; }
+    let e = 0; for (let i = s; i < s + hop; i++) e += ch[i] * ch[i];
+    C.push(den ? num / den : 0); E.push(Math.sqrt(e / hop)); TS.push((s + hop / 2) / sr);
+  }
+  let stop = false;
+  const side = onReady ? onReady(buf.duration).then(v => ({ v }), e => { stop = true; return { e }; }) : null;
+  let A = null; const voice = {};
+  if (deep && sr === 16000) {
+    try {
+      setSt("a", T("aMdl"));
+      const AST = "Xenova/ast-finetuned-audioset-10-10-0.4593";
+      let gpu = $("gpu").checked && !!navigator.gpu;
+      const call = async seg => {
+        try { return await workerCall("audio-classification", AST, seg, { topk: 527 }, gpu); }
+        catch (e) { if (!gpu) throw e; gpu = false; setSt("a", T("gpuFb")); return workerCall("audio-classification", AST, seg, { topk: 527 }, false); }
+      };
+      const W = 163840, H = 8 * sr, wts = { "Happy music": 1.1, "Funny music": 0.8, "Exciting music": 0.6, "Tender music": -0.2, "Sad music": -1.2, "Angry music": -0.8, "Scary music": -0.9 };
+      A = [];
+      for (let s = 0; s < ch.length - sr * 2 && !stop; s += H) {
+        setSt("a", T("aP", Math.round(100 * s / ch.length)));
+        const seg = ch.slice(s, s + W), res = await call(seg);
+        let v = 0, dl = 0;
+        for (const r of (Array.isArray(res) ? res : [res])) {
+          if (wts[r.label]) v += wts[r.label] * r.score;
+          if (DL[r.label]) dl += DL[r.label] * r.score;
+          if (VT[r.label]) voice[VT[r.label]] = (voice[VT[r.label]] || 0) + r.score;
+        }
+        A.push({ t: (s + seg.length / 2) / sr, v, dl });
+      }
+    } catch (e) { A = null; setSt("a", T("aFail")); }
+  }
+  const z = a => { const m = a.reduce((x, y) => x + y) / a.length, sd = Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / a.length) || 1; return a.map(v => (v - m) / sd); };
+  const smooth = (a, r) => a.map((_, i) => { const s = a.slice(Math.max(0, i - r), i + r + 1); return s.reduce((x, y) => x + y) / s.length; });
+  const zc = z(C), ze = z(E);
+  const lerpA = zs => TS.map(t => {
+    const i = A.findIndex(p => p.t > t);
+    if (i === 0) return zs[0]; if (i < 0) return zs[zs.length - 1];
+    const k = (t - A[i - 1].t) / (A[i].t - A[i - 1].t); return zs[i - 1] + (zs[i] - zs[i - 1]) * k;
+  });
+  let slow = null, sdl = null;
+  if (A && A.length > 2) { slow = lerpA(z(A.map(p => p.v))); sdl = lerpA(z(A.map(p => p.dl))); }
+  
+  // Prilagođeno ponderiranje: smanjen utjecaj samih visokih frekvencija da tužne balade ne odlete u visine
+  const raw = TS.map((_, i) => slow ? 0.7 * slow[i] + 0.15 * zc[i] + 0.15 * ze[i] : 0.3 * zc[i] + 0.7 * ze[i]);
+  const sm = smooth(raw, 3), mx = Math.max(...sm.map(Math.abs)) || 1;
+  const us = smooth(TS.map((_, i) => slow ? Math.abs(slow[i] - (zc[i] + ze[i]) / 2) : Math.abs(zc[i] - ze[i]) / 2), 4);
+  const dsm = smooth(TS.map((_, i) => 0.6 * ze[i] + 0.25 * zc[i] + (sdl ? 0.15 * sdl[i] : 0)), 3).map(x => 1 / (1 + Math.exp(-1.4 * x)));
+  const db = E.filter(e => e > 1e-4).map(e => 20 * Math.log10(e)), mdb = db.reduce((a, b) => a + b, 0) / (db.length || 1);
+  const std = Math.sqrt(db.reduce((a, b) => a + (b - mdb) ** 2, 0) / (db.length || 1));
+  const vk = Object.entries(voice).sort((a, b) => b[1] - a[1])[0];
+  const profile = { voice: vk && A && vk[1] / A.length > 0.04 ? vk[0] : "", dyn: +Math.max(0, Math.min(1, (std - 2) / 6)).toFixed(2) };
+  const sdn = side ? await side : null; if (sdn && sdn.e) throw sdn.e;
+  return { duration: buf.duration, profile, side: sdn && sdn.v, music: sm.map((v, i) => ({ t: +TS[i].toFixed(2), v: v / mx, u: us[i] / (3 * mx) + 0.04, d: +dsm[i].toFixed(3) })) };
+}
+
+function tryStart() {
+  if (!D || !audioReady) return;
+  $("setup").hidden = true; $("stage").hidden = false;
+  $("title").textContent = D.title; $("artist").textContent = subLine(); $("singerProfile").textContent = profileLine();
+  
+  fetchFunFact(D.artist, D.title);
+
+  player.addEventListener("play", loop);
+  player.addEventListener("seeked", draw);
+  draw();
+}
+
+function musicAt(t) {
+  const m = D.music, n = m.length;
+  if (t <= m[0].t) return m[0]; if (t >= m[n - 1].t) return m[n - 1];
+  let lo = 0, hi = n - 1; while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (m[mid].t > t) hi = mid; else lo = mid; }
+  const p0 = m[Math.max(0, lo - 1)], p1 = m[lo], p2 = m[hi], p3 = m[Math.min(n - 1, hi + 1)], k = (t - p1.t) / (p2.t - p1.t), k2 = k * k, k3 = k2 * k;
+  const c = f => 0.5 * (2 * p1[f] + (-p0[f] + p2[f]) * k + (2 * p0[f] - 5 * p1[f] + 4 * p2[f] - p3[f]) * k2 + (-p0[f] + 3 * p1[f] - 3 * p2[f] + p3[f]) * k3);
+  return { v: c("v"), u: Math.max(0.03, c("u")), d: Math.max(0, Math.min(1, c("d"))) };
+}
+
+function lyricAt(t) { let r = null; for (const l of D.lyrics) { if (l.t <= t) r = l; else break; } return r; }
+
+/* KRETANJE PO BRZIM ISJEČCIMA STIHOVA */
+function lyricVal(t, f = "s") {
+  const g = l => (l[f] == null ? (f === "s" ? 0 : 0.3) : l[f]);
+  let i = -1; for (let j = 0; j < D.lyrics.length; j++) { if (D.lyrics[j].t <= t) i = j; else break; }
+  if (i < 0) return g(D.lyrics[0]);
+  const cl = D.lyrics[i], dur = cl.dur || 0.8;
+  const cur = g(cl), prev = i ? g(D.lyrics[i - 1]) : cur, p = Math.min(1, Math.max(0, (t - cl.t) / dur)), k = p * p * (3 - 2 * p);
+  const base = prev + (cur - prev) * k;
+  if (f !== "s") return Math.max(0, Math.min(1, base));
+  
+  const pr = D.profile || {}, factor = 0.85 + 0.45 * (pr.dyn == null ? 0.5 : pr.dyn), d = musicAt(t).d;
+  return Math.max(-1, Math.min(1, base + Math.sin(p * Math.PI) * 0.08 * factor * (0.6 + 0.8 * (d == null ? 0.5 : d))));
+}
+
+function subLine() { return [D.artist, D.note].filter(Boolean).join(" · "); }
+function profileLine() {
+  const p = D.profile || {}, parts = [];
+  if (p.voice) parts.push(T("voice")[p.voice]);
+  if (p.dyn != null) parts.push(T("dyn")[p.dyn < 0.34 ? 0 : p.dyn < 0.67 ? 1 : 2]);
+  return parts.length ? `${T("vs")}: ${parts.join(" · ")}` : "";
+}
+
+const Y = v => H / 2 - v * (H / 2 - 40);
+function el(name, attrs, parent) { const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+function trail(svg, pts, color, w) {
+  if (pts.length > 1) el("polyline", { points: pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "), fill: "none", stroke: color, "stroke-width": w * 2.8, "stroke-opacity": 0.1, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+  const n = pts.length, chunk = Math.max(2, Math.ceil(n / 20));
+  for (let a = 0; a < n - 1; a += chunk) {
+    const seg = pts.slice(a, Math.min(n, a + chunk + 1)), f = Math.min(1, (a + chunk) / n);
+    el("polyline", { points: seg.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "), fill: "none", stroke: color, "stroke-width": (1.5 + w * f).toFixed(2), "stroke-opacity": (0.1 + 0.9 * f * f).toFixed(2), "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+  }
+}
+
+let level = 0, AN = null, AC = null, ANbuf = null;
+function setupAnalyser() {
+  if (AN) return;
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const src = AC.createMediaElementSource($("player"));
+    AN = AC.createAnalyser(); AN.fftSize = 512; src.connect(AN); AN.connect(AC.destination); ANbuf = new Uint8Array(AN.fftSize);
+  } catch { AN = null; }
+}
+
+function readLevel() {
+  if (!AN) return;
+  AN.getByteTimeDomainData(ANbuf);
+  let s = 0; for (const b of ANbuf) { const d = (b - 128) / 128; s += d * d; }
+  level += (Math.min(1, Math.sqrt(s / ANbuf.length) * 3.5) - level) * 0.35;
+}
+
+$("player").addEventListener("play", () => { setupAnalyser(); if (AC && AC.state === "suspended") AC.resume(); });
+
+let shownLine = null, shownNow = null;
+function showLayers(cur) {
+  if (cur === shownLine) return; shownLine = cur;
+  $("layers").innerHTML = cur ? `<div class="desc">${lineDesc(cur)}</div>` + (cur.em || []).map(([k, p]) => `<div class="lay"><span>${emoName(k)}</span><i><b style="width:${Math.round(Math.min(1, p * 1.6) * 100)}%"></b></i></div>`).join("") : "";
+}
+
+function draw() {
+  const t = $("player").currentTime, svg = $("chart"); svg.innerHTML = "";
+  if (player.duration) { $("spotifyFill").style.width = (t / player.duration * 100) + "%"; $("currTime").textContent = fmt(t); }
+  const t0 = Math.max(0, t - WINDOW * HEAD), t1 = t0 + WINDOW, X = s => PAD + (s - t0) / WINDOW * (W - 2 * PAD);
+
+  el("text", { x: 16, y: 26, class: "zone" }, svg).textContent = T("bright");
+  el("text", { x: 16, y: H - 40, class: "zone" }, svg).textContent = T("dark");
+  el("line", { x1: 0, x2: W, y1: H / 2, y2: H / 2, stroke: "rgba(200,190,255,.3)", "stroke-dasharray": "6 6" }, svg);
+  for (let s = Math.ceil(t0 / 5) * 5; s <= t1; s += 5) el("text", { x: X(s), y: H - 12, class: "axis", "text-anchor": "middle" }, svg).textContent = fmt(s);
+
+  const ts = []; for (let s = t0; s < t; s += 0.2) ts.push(s); ts.push(t);
+  const M = ts.map(s => ({ s, ...musicAt(s) }));
+  const first = D.lyrics[0].t, Ls = ts.filter(s => s >= first).map(s => ({ s, v: lyricVal(s) }));
+
+  if (M.length > 1) {
+    const up = M.map(p => `${X(p.s)},${Y(Math.min(1, p.v + p.u))}`), dn = M.slice().reverse().map(p => `${X(p.s)},${Y(Math.max(-1, p.v - p.u))}`);
+    el("polygon", { points: [...up, ...dn].join(" "), fill: "#6fd8ff", opacity: .16 }, svg);
+  }
+  if (Ls.length > 1) {
+    const a = Ls.map(p => `${X(p.s)},${Y(p.v)}`), b = Ls.slice().reverse().map(p => `${X(p.s)},${Y(musicAt(p.s).v)}`);
+    el("polygon", { points: [...a, ...b].join(" "), fill: "#ff7de9", opacity: .16 }, svg);
+    const hw = p => 0.03 + 0.15 * lyricVal(p.s, "inten");
+    el("polygon", { points: [...Ls.map(p => `${X(p.s)},${Y(Math.min(1, p.v + hw(p)))}`), ...Ls.slice().reverse().map(p => `${X(p.s)},${Y(Math.max(-1, p.v - hw(p)))}`)].join(" "), fill: "#ff7de9", opacity: .13 }, svg);
+    trail(svg, Ls.map(p => ({ x: X(p.s), y: Y(p.v) })), "#ff7de9", 4);
+  }
+  if (M.length > 1) trail(svg, M.map(p => ({ x: X(p.s), y: Y(p.v) })), "#6fd8ff", 4);
+
+  if (D.split_t >= t0 && D.split_t <= t) {
+    el("line", { x1: X(D.split_t), x2: X(D.split_t), y1: 40, y2: H - 30, stroke: "#6fd8ff", "stroke-dasharray": "2 5" }, svg);
+    el("text", { x: X(D.split_t) + 8, y: 56, class: "zone", fill: "#6fd8ff" }, svg).textContent = T("split");
+  }
+
+  const cx = X(t); el("line", { x1: cx, x2: cx, y1: 30, y2: H - 30, stroke: "rgba(255,255,255,.4)" }, svg);
+  const cur = lyricAt(t), mv = musicAt(t);
+  el("circle", { cx, cy: Y(mv.v), r: 14 + level * 10, fill: "#6fd8ff", opacity: 0.12 + level * 0.15 }, svg);
+  el("circle", { cx, cy: Y(mv.v), r: 7 + level * 4, fill: "#6fd8ff", stroke: "#ffffff", "stroke-width": 3 }, svg);
+  if (cur) {
+    const cv = lyricVal(t), cy = Y(cv);
+    el("circle", { cx, cy, r: 17, fill: "#ff7de9", opacity: 0.2 }, svg);
+    el("circle", { cx, cy, r: 8, fill: "#ff7de9", stroke: "#ffffff", "stroke-width": 3 }, svg);
+    const lb = lineLabel(cur);
+    if (lb) {
+      const w = 22 + lb.length * 9.5, x = Math.min(cx + 16, W - w - 8), y = Math.min(Math.max(cy - 15, 62), H - 70);
+      el("rect", { x, y, width: w, height: 30, rx: 15, fill: "#c63bd6" }, svg);
+      el("text", { x: x + w / 2, y: y + 20, class: "pill", "text-anchor": "middle" }, svg).textContent = lb.toUpperCase();
+    }
+  }
+  if (cur !== shownNow) {
+    shownNow = cur;
+    const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])), ln = cur && cur.line ? cur.line : cur ? cur.text : "", i = cur ? ln.indexOf(cur.text) : -1;
+    $("now").innerHTML = !cur ? "" : i < 0 ? `“${esc(cur.text)}”` : `“${esc(ln.slice(0, i))}<span class="seg">${esc(cur.text)}</span>${esc(ln.slice(i + cur.text.length))}”`;
+  }
+  showLayers(cur);
+
+  /* POBOLJŠANA KALKULACIJA VERTIKALNOG METERA SINKRONIZACIJE (PUNJENJE TIK UZ POKLAPANJE) */
+  const curDiff = cur ? Math.abs(mv.v - lyricVal(t)) : 1;
+  const instantSync = Math.max(0, 1 - curDiff);
+  
+  let sum = 0, n = 0; 
+  for (let s = first; s <= t; s += 0.5) { 
+    sum += Math.abs(musicAt(s).v - lyricVal(s)); 
+    n++; 
+  }
+  const avgSync = n ? Math.max(0, 1 - sum / n / 2) : 0;
+  
+  // Kombinacija trenutnog presjeka (70%) i prosjeka (30%) za puni odaziv
+  const finalSync = Math.round((0.7 * instantSync + 0.3 * avgSync) * 100);
+  $("vMeterFill").style.height = `${Math.max(5, Math.min(100, finalSync))}%`;
+}
+
+let lastDraw = 0;
+function loop() { readLevel(); const now = performance.now(); if (now - lastDraw > 33) { draw(); lastDraw = now; } if (!$("player").paused) requestAnimationFrame(loop); }
+
+(function stars() {
+  const sp = $("stars"), rnd = (a, b) => a + Math.random() * (b - a);
+  for (let i = 0; i < 60; i++) { 
+    const s = document.createElement("i"), z = rnd(1, 2.5); 
+    s.className = "star"; 
+    s.style.cssText = `left:${rnd(0, 100)}%;top:${rnd(0, 100)}%;width:${z}px;height:${z}px;`; 
+    sp.appendChild(s); 
+  }
+})();
+
+$("gpu").checked = !!navigator.gpu; $("gpu").disabled = !navigator.gpu;
+applyLang();
+</script>
+</body>
+</html>
