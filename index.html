@@ -163,6 +163,22 @@
 </head>
 <body>
 <div id="space"><div id="stars"></div></div>
+<!-- Sekcija za komentare (Netlify Forms) -->
+  <section class="comments-section">
+    <h2>Komentari i dojmovi</h2>
+    <form name="komentari" method="POST" data-netlify="true" style="display:grid; gap:12px; max-width:600px; margin:0 auto;">
+      <input type="hidden" name="form-name" value="komentari">
+      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
+        Vaše ime ili nadimak:
+        <input type="text" name="name" required placeholder="npr. Marko" style="margin-top:4px;">
+      </label>
+      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
+        Komentar:
+        <textarea name="message" rows="4" required placeholder="Napišite vaše mišljenje ili dojam o pjesmi..." style="margin-top:4px;"></textarea>
+      </label>
+      <button type="submit" class="action-btn">Objavi komentar</button>
+    </form>
+  </section>
 <main>
   <div class="langbar"><select id="lang"><option value="hr">Hrvatski</option><option value="en">English</option><option value="it">Italiano</option></select></div>
   <h1 data-i="title">Zvuči li kako se osjeća?</h1>
