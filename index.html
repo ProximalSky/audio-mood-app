@@ -73,7 +73,7 @@
   .sub { color:var(--muted); margin-bottom:8px; font-weight:500; font-size:1.1rem; }
   .singer-profile { font-size:.82rem; color:#a9b8ff; letter-spacing:.07em; text-transform:uppercase; margin:2px 0 14px; min-height:1.2em; }
 
-  .setup, .spotify-player, .fact-card, .faq-section { 
+  .setup, .spotify-player, .fact-card, .faq-section, .comments-section { 
     background:var(--panel); border:1px solid var(--border); border-radius:18px; 
     box-shadow:0 8px 32px rgba(0,0,0,.3); 
   }
@@ -82,6 +82,9 @@
   .setup label { font-size:.85rem; color:var(--muted); display:grid; gap:6px; }
   .setup label.chk { display:flex; gap:8px; align-items:center; color:var(--ink); cursor:pointer; } .chk input { width:auto; }
   summary { cursor:pointer; color:var(--muted); font-size:.9rem; margin-bottom:8px; }
+
+  .converter-box { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.25); border-radius: 12px; border: 1px dashed var(--border); }
+  .converter-box h4 { margin: 0 0 8px; font-size: 0.9rem; color: var(--cyan); }
 
   .stage-grid { display:grid; grid-template-columns:1fr; gap:20px; text-align:center; }
   @media (min-width: 880px) {
@@ -146,12 +149,16 @@
   #status { font-size:.85rem; color:#ffb3f1; min-height:1.3em; font-weight:500; }
   #stage[hidden] { display:none; }
 
-  /* FAQ sekcija na dnu */
+  /* FAQ sekcija */
   .faq-section { max-width: 800px; margin: 40px auto 0; padding: 24px; text-align: left; font-size: 0.92rem; line-height: 1.6; }
   .faq-section h2 { font-size: 1.25rem; color: #f0a6ff; margin-top: 0; margin-bottom: 16px; text-align: center; font-family: var(--sans); }
   .faq-item { margin-bottom: 16px; }
   .faq-item h3 { font-size: 0.98rem; color: var(--cyan); margin: 0 0 4px; font-weight: 600; }
   .faq-item p { margin: 0; color: var(--muted); }
+
+  /* Komentari sekcija */
+  .comments-section { max-width: 800px; margin: 24px auto 0; padding: 24px; text-align: left; }
+  .comments-section h2 { font-size: 1.25rem; color: #f0a6ff; margin-top: 0; margin-bottom: 16px; text-align: center; font-family: var(--sans); }
 </style>
 </head>
 <body>
@@ -171,11 +178,19 @@
     <button id="go" class="action-btn" data-i="go">Analiziraj</button>
     <select id="cands" hidden></select>
     <div id="status"></div>
-    <details><summary data-i="manual">Ručno (samo ako zatreba)</summary>
+    <details><summary data-i="manual">Ručno / Dodatni alati</summary>
       <label><span data-i="fLrc">Učitaj .lrc datoteku</span><input type="file" id="lrcFile" accept=".lrc,.txt"></label>
       <label><span data-i="fText">Tekst s vremenima (.lrc)</span><textarea id="lrcText" rows="4"></textarea></label>
-      <button id="mkPrompt" class="action-btn" data-i="mk">Kopiraj prompt za Claude chat</button>
+      <button id="mkPrompt" class="action-btn" data-i="mk" style="margin-bottom:12px;">Kopiraj prompt za Claude chat</button>
       <label><span data-i="fScore">Claudeove ocjene (JSON)</span><textarea id="scoreText" rows="4"></textarea></label>
+
+      <!-- Alat za konverziju audio datoteka -->
+      <div class="converter-box">
+        <h4>🔄 Pretvarač audio formata (Lokalno u WAV)</h4>
+        <label><span>Odaberite datoteku za pretvorbu (ogg/flac/m4a/mp3)</span><input type="file" id="convertFile" accept="audio/*"></label>
+        <button id="convertBtn" class="action-btn" style="margin-top:8px;">Pretvori i preuzmi WAV</button>
+        <div id="convertStatus" style="font-size:0.8rem; color:var(--muted); margin-top:4px;"></div>
+      </div>
     </details>
   </div>
 
@@ -227,7 +242,7 @@
     <audio id="player"></audio>
   </section>
 
-  <!-- FAQ / Opis alata za korisnike i pretraživače -->
+  <!-- FAQ sekcija -->
   <section class="faq-section">
     <h2>Kako alat funkcionira?</h2>
     
@@ -246,22 +261,35 @@
       <p>Možete učitati zvučne datoteke u MP3, WAV, FLAC ili OGG formatu. Tekst pjesme s vremenskim oznakama automatski se preuzima putem javnih baza ili ga možete učitati ručno u .LRC formatu.</p>
     </div>
   </section>
+
+  <!-- Sekcija za komentare (Cusdis) -->
+  <section class="comments-section">
+    <h2>Komentari i dojmovi</h2>
+    <div id="cusdis_thread"
+      data-host="https://cusdis.com"
+      data-app-id="AUDIO_MOOD_APP_CUSDIS_ID"
+      data-page-id="audio-mood-app-main"
+      data-page-url="https://audio-mood-app.netlify.app/"
+      data-page-title="Zvuči li kako se osjeća?"
+    ></div>
+    <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+  </section>
 </main>
 
 <script>
 const $ = id => document.getElementById(id);
 const I18N = {
-  hr: { title: "Zvuči li kako se osjeća?", heroIntro: "Usporedite emociju zvuka i značenje teksta pjesme kroz vrijeme. Učitajte zvučni zapis i saznajte nalazi li se energija glazbe u skladu ili u kontrastu sa stihovima.", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno (samo ako zatreba)", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
+  hr: { title: "Zvuči li kako se osjeća?", heroIntro: "Usporedite emociju zvuka i značenje teksta pjesme kroz vrijeme. Učitajte zvučni zapis i saznajte nalazi li se energija glazbe u skladu ili u kontrastu sa stihovima.", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno / Dodatni alati", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
     noFile: "Prvo odaberi mp3.", an: "Analiziram zvuk...", srch: "Tražim tekst...", none: "Nema teksta s vremenima.", noL: "Fali tekst s vremenima.", err: "Greška: ",
     tags: (a, t) => `Iz datoteke: ${a || "?"} – ${t}`, noTags: "Nema metapodataka, koristim ime datoteke.", warn: d => `pazi: tekst odstupa ${d} s`, ptxt: "Prvo treba tekst.", pok: "Prompt kopiran.", pfb: "Kopiraj prompt iz polja.", pick: "Odabran drugi tekst. Klikni Analiziraj.",
     mdl: (f, p) => `Skidam model ${f} ${p}%`, aMdl: "Skidam AI model...", aP: p => `AI analiza ${p}%...`, aFail: "AI analiza nije uspjela.", gpuFb: "GPU nedostupan, koristim CPU.", tP: (n, m) => `Analiza teksta ${n}/${m}...`,
     tone: ["duboko mračno", "tmurno", "dvosmisleno", "toplo", "izrazito svijetlo"], str: ["tiho", "umjereno", "snažno"], val: ["mračno", "teško", "sjetno", "toplo", "svijetlo"], with: "s primjesom", vs: "Vokalni stil", voice: { male: "muški vokal", female: "ženski vokal", choir: "zbor", rap: "rep" }, dyn: ["ujednačena dinamika", "umjerena dinamika", "široka dinamika"] },
-  en: { title: "Does it sound the way it feels?", heroIntro: "Compare audio emotion against timed lyrics over time. Upload a track to see whether the music aligns with or contrasts the lyrics.", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
+  en: { title: "Does it sound the way it feels?", heroIntro: "Compare audio emotion against timed lyrics over time. Upload a track to see whether the music aligns with or contrasts the lyrics.", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual / Extra tools", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
     noFile: "Choose an mp3 first.", an: "Analyzing audio...", srch: "Searching lyrics...", none: "No timed lyrics found.", noL: "Timed lyrics missing.", err: "Error: ",
     tags: (a, t) => `From file: ${a || "?"} – ${t}`, noTags: "No tags found.", warn: d => `differs by ${d} s`, ptxt: "Timed lyrics needed.", pok: "Prompt copied.", pfb: "Copy prompt from box.", pick: "Selected. Click Analyze.",
     mdl: (f, p) => `Downloading ${f} ${p}%`, aMdl: "Downloading model...", aP: p => `AI audio analysis ${p}%...`, aFail: "AI analysis failed.", gpuFb: "Using CPU.", tP: (n, m) => `Analyzing lyrics ${n}/${m}...`,
     tone: ["deeply dark", "gloomy", "ambiguous", "warm", "radiantly bright"], str: ["quietly", "moderately", "intensely"], val: ["dark", "heavy", "melancholic", "warm", "bright"], with: "with a hint of", vs: "Vocal style", voice: { male: "male vocal", female: "female vocal", choir: "choir", rap: "rap" }, dyn: ["even dynamics", "moderate dynamics", "wide dynamics"] },
-  it: { title: "Suona come si sente?", heroIntro: "Confronta l'emozione dell'audio con il significato del testo nel tempo. Carica un brano e scopri se la musica è in sintonia o in contrasto con le parole.", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
+  it: { title: "Suona come si sente?", heroIntro: "Confronta l'emozione dell'audio con il significato del testo nel tempo. Carica un brano e scopri se la musica è in sintonia o in contrasto con le parole.", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale / Strumenti extra", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
     noFile: "Scegli prima un mp3.", an: "Analizzo l'audio...", srch: "Cerco il testo...", none: "Nessun testo trovato.", noL: "Manca il testo.", err: "Errore: ",
     tags: (a, t) => `Dal file: ${a || "?"} – ${t}`, noTags: "Nessun tag.", warn: d => `differisce di ${d} s`, ptxt: "Serve prima il testo.", pok: "Prompt copiato.", pfb: "Copia il prompt.", pick: "Altra versione scelta. Premi Analizza.",
     mdl: (f, p) => `Scarico ${f} ${p}%`, aMdl: "Scarico modello...", aP: p => `Analisi AI ${p}%...`, aFail: "Analisi fallita.", gpuFb: "Uso CPU.", tP: (n, m) => `Analisi testo ${n}/${m}...`,
@@ -287,6 +315,75 @@ function normalizeText(str) {
             .replace(/č/g, "c").replace(/Č/g, "C")
             .replace(/ž/g, "z").replace(/Ž/g, "Z");
 }
+
+/* LOKALNI ALAT ZA KONVERZIJU U WAV */
+$("convertBtn").onclick = async () => {
+  const fileInput = $("convertFile");
+  const statusDiv = $("convertStatus");
+  if (!fileInput.files.length) {
+    statusDiv.textContent = "Odaberite datoteku za pretvorbu.";
+    return;
+  }
+  const file = fileInput.files[0];
+  statusDiv.textContent = "Pretvaram audio u WAV...";
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    
+    // Konverzija AudioBuffer-a u WAV Blob
+    const numOfChan = audioBuffer.numberOfChannels;
+    const length = audioBuffer.length * numOfChan * 2 + 44;
+    const outBuffer = new ArrayBuffer(length);
+    const view = new DataView(outBuffer);
+    const channels = [];
+    let sample, offset = 0, pos = 0;
+
+    function writeString(str) {
+      for (let i = 0; i < str.length; i++) view.setUint8(pos++, str.charCodeAt(i));
+    }
+    function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+    function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+    writeString('RIFF');
+    setUint32(length - 8);
+    writeString('WAVE');
+    writeString('fmt ');
+    setUint32(16);
+    setUint16(1);
+    setUint16(numOfChan);
+    setUint32(audioBuffer.sampleRate);
+    setUint32(audioBuffer.sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2);
+    setUint16(16);
+    writeString('data');
+    setUint32(length - pos - 4);
+
+    for (let i = 0; i < audioBuffer.numberOfChannels; i++) channels.push(audioBuffer.getChannelData(i));
+
+    while (offset < audioBuffer.length) {
+      for (let i = 0; i < numOfChan; i++) {
+        sample = Math.max(-1, Math.min(1, channels[i][offset]));
+        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+        view.setInt16(pos, sample, true);
+        pos += 2;
+      }
+      offset++;
+    }
+
+    const wavBlob = new Blob([outBuffer], { type: 'audio/wav' });
+    const url = URL.createObjectURL(wavBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name.replace(/\.[^/.]+$/, "") + ".wav";
+    a.click();
+    URL.revokeObjectURL(url);
+    audioCtx.close();
+    statusDiv.textContent = "Pretvorba uspješna! Datoteka je preuzeta.";
+  } catch (err) {
+    statusDiv.textContent = "Greška pri pretvorbi datoteke: " + err.message;
+  }
+};
 
 const NS = "http://www.w3.org/2000/svg";
 const W = 700, H = 400, PAD = 8, WINDOW = 30, HEAD = 0.72;
