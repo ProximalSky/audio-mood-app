@@ -3,16 +3,50 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zvuči li kako se osjeća?</title>
+<title>Zvuči li kako se osjeća? – Usporedba raspoloženja glazbe i teksta pjesme</title>
+<meta name="description" content="Besplatan alat za usporednu analizu emocija u glazbi i tekstu pjesme. Učitajte pjesmu i saznajte odgovara li zvučna atmosfera značenju stihova. Analiza se odvija 100% lokalno u vašem pregledniku.">
+<meta name="keywords" content="analiza pjesme, emocija glazbe, usporedba teksta i glazbe, song mood analyzer, music lyrics mood split">
+
+<!-- Open Graph / Social previews -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Zvuči li kako se osjeća? – Usporedba raspoloženja glazbe i teksta">
+<meta property="og:description" content="Učitajte mp3 ili wav datoteku i otkrijte slaže li se zvučna energija pjesme s emocijom njezinih stihova. Pokreće AI unutar preglednika.">
+<meta property="og:image" content="https://audio-mood-app.netlify.app/og-preview.png">
+<meta property="og:url" content="https://audio-mood-app.netlify.app/">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Zvuči li kako se osjeća?">
+<meta name="twitter:description" content="Nalazi li se vaša omiljena pjesma u kontrastu između veselog ritma i tužnog teksta? Provjerite besplatno.">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Structured Data (JSON-LD) for WebApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Zvuči li kako se osjeća?",
+  "url": "https://audio-mood-app.netlify.app/",
+  "description": "Nalazi li se zvučna emocija pjesme u skladu s njezinim tekstom? Alat besplatno i lokalno analizira zvučni zapis i stihove te stvara usporedni grafikon raspoloženja.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  }
+}
+</script>
+
 <style>
-  @font-face { font-family: "Overglow"; src: url("Overglow.otf"), url("Overglow.ttf"); font-display: swap; }
   :root { 
     --ink:#f3eeff; --muted:#b9b0f2; --pink:#ff7de9; --cyan:#6fd8ff; --violet:#8b5cff;
     --panel:rgba(16,10,58,.65); --border:rgba(190,150,255,.25);
-    --script:"Overglow","Kaushan Script","Brush Script MT",cursive; --sans:"Poppins",system-ui,"Segoe UI",sans-serif; 
+    --script:"Kaushan Script","Brush Script MT",cursive; --sans:"Poppins",system-ui,"Segoe UI",sans-serif; 
   }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; color:var(--ink); font-family:var(--sans);
@@ -24,7 +58,9 @@
   .star { position:absolute; border-radius:50%; background:#fff; opacity:.4; }
   
   main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 40px; text-align: center; }
-  h1 { font-family:var(--script); font-weight:400; font-size:2.1rem; margin:0 0 16px; color:#f0a6ff; text-shadow:0 0 16px rgba(214,120,255,.75); }
+  h1 { font-family:var(--script); font-weight:400; font-size:2.2rem; margin:0 0 8px; color:#f0a6ff; text-shadow:0 0 16px rgba(214,120,255,.75); }
+
+  .hero-intro { max-width: 720px; margin: 0 auto 24px; color: var(--muted); font-size: 1rem; line-height: 1.6; font-weight: 400; }
 
   .mtv-title-container { display:inline-block; margin:8px 0 2px; position:relative; }
   .mtv-title { 
@@ -37,7 +73,7 @@
   .sub { color:var(--muted); margin-bottom:8px; font-weight:500; font-size:1.1rem; }
   .singer-profile { font-size:.82rem; color:#a9b8ff; letter-spacing:.07em; text-transform:uppercase; margin:2px 0 14px; min-height:1.2em; }
 
-  .setup, .spotify-player, .fact-card { 
+  .setup, .spotify-player, .fact-card, .faq-section { 
     background:var(--panel); border:1px solid var(--border); border-radius:18px; 
     box-shadow:0 8px 32px rgba(0,0,0,.3); 
   }
@@ -109,27 +145,37 @@
   button.action-btn:hover { opacity:.9; }
   #status { font-size:.85rem; color:#ffb3f1; min-height:1.3em; font-weight:500; }
   #stage[hidden] { display:none; }
+
+  /* FAQ sekcija na dnu */
+  .faq-section { max-width: 800px; margin: 40px auto 0; padding: 24px; text-align: left; font-size: 0.92rem; line-height: 1.6; }
+  .faq-section h2 { font-size: 1.25rem; color: #f0a6ff; margin-top: 0; margin-bottom: 16px; text-align: center; font-family: var(--sans); }
+  .faq-item { margin-bottom: 16px; }
+  .faq-item h3 { font-size: 0.98rem; color: var(--cyan); margin: 0 0 4px; font-weight: 600; }
+  .faq-item p { margin: 0; color: var(--muted); }
 </style>
 </head>
 <body>
 <div id="space"><div id="stars"></div></div>
 <main>
   <div class="langbar"><select id="lang"><option value="hr">Hrvatski</option><option value="en">English</option><option value="it">Italiano</option></select></div>
-  <h1 data-i="title"></h1>
+  <h1 data-i="title">Zvuči li kako se osjeća?</h1>
+  <p class="hero-intro" data-i="heroIntro">
+    Usporedite emociju zvuka i značenje teksta pjesme kroz vrijeme. Učitajte zvučni zapis i saznajte nalazi li se energija glazbe u skladu ili u kontrastu sa stihovima.
+  </p>
 
   <div class="setup" id="setup">
-    <label><span data-i="f1"></span><input type="file" id="audioFile" accept="audio/*"></label>
-    <label><span data-i="f2"></span><input id="q" data-ph="ph"></label>
-    <label class="chk"><input type="checkbox" id="deep" checked><span data-i="deep"></span></label>
-    <label class="chk"><input type="checkbox" id="gpu"><span data-i="gpu"></span></label>
-    <button id="go" class="action-btn" data-i="go"></button>
+    <label><span data-i="f1">1. Odaberi pjesmu (mp3/wav)</span><input type="file" id="audioFile" accept="audio/*"></label>
+    <label><span data-i="f2">2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)</span><input id="q" data-ph="ph" placeholder="izvođač naslov"></label>
+    <label class="chk"><input type="checkbox" id="deep" checked><span data-i="deep">Točnija analiza zvuka (AI model, sporije)</span></label>
+    <label class="chk"><input type="checkbox" id="gpu"><span data-i="gpu">GPU ubrzanje (WebGPU)</span></label>
+    <button id="go" class="action-btn" data-i="go">Analiziraj</button>
     <select id="cands" hidden></select>
     <div id="status"></div>
-    <details><summary data-i="manual"></summary>
-      <label><span data-i="fLrc"></span><input type="file" id="lrcFile" accept=".lrc,.txt"></label>
-      <label><span data-i="fText"></span><textarea id="lrcText" rows="4"></textarea></label>
-      <button id="mkPrompt" class="action-btn" data-i="mk"></button>
-      <label><span data-i="fScore"></span><textarea id="scoreText" rows="4"></textarea></label>
+    <details><summary data-i="manual">Ručno (samo ako zatreba)</summary>
+      <label><span data-i="fLrc">Učitaj .lrc datoteku</span><input type="file" id="lrcFile" accept=".lrc,.txt"></label>
+      <label><span data-i="fText">Tekst s vremenima (.lrc)</span><textarea id="lrcText" rows="4"></textarea></label>
+      <button id="mkPrompt" class="action-btn" data-i="mk">Kopiraj prompt za Claude chat</button>
+      <label><span data-i="fScore">Claudeove ocjene (JSON)</span><textarea id="scoreText" rows="4"></textarea></label>
     </details>
   </div>
 
@@ -148,12 +194,12 @@
 
       <div class="main-stage">
         <div class="legend">
-          <span style="color:#6fd8ff"><i style="background:#6fd8ff"></i><span style="color:var(--ink)" data-i="lm"></span></span>
-          <span style="color:#ff7de9"><span style="color:var(--ink)" data-i="lw"></span><i style="background:#ff7de9;margin:0 0 0 8px"></i></span>
+          <span style="color:#6fd8ff"><i style="background:#6fd8ff"></i><span style="color:var(--ink)" data-i="lm">kako zvuči</span></span>
+          <span style="color:#ff7de9"><span style="color:var(--ink)" data-i="lw">što riječi kažu</span><i style="background:#ff7de9;margin:0 0 0 8px"></i></span>
         </div>
 
         <div class="chart-container">
-          <svg id="chart" viewBox="0 0 700 400" role="img"></svg>
+          <svg id="chart" viewBox="0 0 700 400" role="img" aria-label="Grafikon usporedbe emocije glazbe i teksta pjesme kroz vrijeme"></svg>
           <div class="v-meter-wrap" title="Sinkronizacija riječi i zvuka">
             <div class="v-meter-fill" id="vMeterFill"></div>
             <div class="v-meter-label">SYNC</div>
@@ -180,22 +226,42 @@
     </div>
     <audio id="player"></audio>
   </section>
+
+  <!-- FAQ / Opis alata za korisnike i pretraživače -->
+  <section class="faq-section">
+    <h2>Kako alat funkcionira?</h2>
+    
+    <div class="faq-item">
+      <h3>Što točno ovaj alat analizira?</h3>
+      <p>Alat uspoređuje zvučnu atmosferu glazbene matrice (tempo, dinamiku, harmoniju i ton) s emocionalnim nabojem stihova kroz stope i strofe pjesme. Plava linija prikazuje kako glazba zvuči, dok ružičasta linija prikazuje što riječi govore.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Šalje li se moja audio datoteka na vanjski poslužitelj?</h3>
+      <p>Ne. Cjelokupna AI analiza zvuka i obrada izvode se 100% lokalno u vašem pregledniku pomoću WebAssembly i WebGPU tehnologije. Vaše audio datoteke nikada ne napuštaju vaše računalo ili mobitel.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Koje datoteke i formati su podržani?</h3>
+      <p>Možete učitati zvučne datoteke u MP3, WAV, FLAC ili OGG formatu. Tekst pjesme s vremenskim oznakama automatski se preuzima putem javnih baza ili ga možete učitati ručno u .LRC formatu.</p>
+    </div>
+  </section>
 </main>
 
 <script>
 const $ = id => document.getElementById(id);
 const I18N = {
-  hr: { title: "Zvuči li kako se osjeća?", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno (samo ako zatreba)", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
+  hr: { title: "Zvuči li kako se osjeća?", heroIntro: "Usporedite emociju zvuka i značenje teksta pjesme kroz vrijeme. Učitajte zvučni zapis i saznajte nalazi li se energija glazbe u skladu ili u kontrastu sa stihovima.", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno (samo ako zatreba)", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
     noFile: "Prvo odaberi mp3.", an: "Analiziram zvuk...", srch: "Tražim tekst...", none: "Nema teksta s vremenima.", noL: "Fali tekst s vremenima.", err: "Greška: ",
     tags: (a, t) => `Iz datoteke: ${a || "?"} – ${t}`, noTags: "Nema metapodataka, koristim ime datoteke.", warn: d => `pazi: tekst odstupa ${d} s`, ptxt: "Prvo treba tekst.", pok: "Prompt kopiran.", pfb: "Kopiraj prompt iz polja.", pick: "Odabran drugi tekst. Klikni Analiziraj.",
     mdl: (f, p) => `Skidam model ${f} ${p}%`, aMdl: "Skidam AI model...", aP: p => `AI analiza ${p}%...`, aFail: "AI analiza nije uspjela.", gpuFb: "GPU nedostupan, koristim CPU.", tP: (n, m) => `Analiza teksta ${n}/${m}...`,
     tone: ["duboko mračno", "tmurno", "dvosmisleno", "toplo", "izrazito svijetlo"], str: ["tiho", "umjereno", "snažno"], val: ["mračno", "teško", "sjetno", "toplo", "svijetlo"], with: "s primjesom", vs: "Vokalni stil", voice: { male: "muški vokal", female: "ženski vokal", choir: "zbor", rap: "rep" }, dyn: ["ujednačena dinamika", "umjerena dinamika", "široka dinamika"] },
-  en: { title: "Does it sound the way it feels?", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
+  en: { title: "Does it sound the way it feels?", heroIntro: "Compare audio emotion against timed lyrics over time. Upload a track to see whether the music aligns with or contrasts the lyrics.", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
     noFile: "Choose an mp3 first.", an: "Analyzing audio...", srch: "Searching lyrics...", none: "No timed lyrics found.", noL: "Timed lyrics missing.", err: "Error: ",
     tags: (a, t) => `From file: ${a || "?"} – ${t}`, noTags: "No tags found.", warn: d => `differs by ${d} s`, ptxt: "Timed lyrics needed.", pok: "Prompt copied.", pfb: "Copy prompt from box.", pick: "Selected. Click Analyze.",
     mdl: (f, p) => `Downloading ${f} ${p}%`, aMdl: "Downloading model...", aP: p => `AI audio analysis ${p}%...`, aFail: "AI analysis failed.", gpuFb: "Using CPU.", tP: (n, m) => `Analyzing lyrics ${n}/${m}...`,
     tone: ["deeply dark", "gloomy", "ambiguous", "warm", "radiantly bright"], str: ["quietly", "moderately", "intensely"], val: ["dark", "heavy", "melancholic", "warm", "bright"], with: "with a hint of", vs: "Vocal style", voice: { male: "male vocal", female: "female vocal", choir: "choir", rap: "rap" }, dyn: ["even dynamics", "moderate dynamics", "wide dynamics"] },
-  it: { title: "Suona come si sente?", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
+  it: { title: "Suona come si sente?", heroIntro: "Confronta l'emozione dell'audio con il significato del testo nel tempo. Carica un brano e scopri se la musica è in sintonia o in contrasto con le parole.", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
     noFile: "Scegli prima un mp3.", an: "Analizzo l'audio...", srch: "Cerco il testo...", none: "Nessun testo trovato.", noL: "Manca il testo.", err: "Errore: ",
     tags: (a, t) => `Dal file: ${a || "?"} – ${t}`, noTags: "Nessun tag.", warn: d => `differisce di ${d} s`, ptxt: "Serve prima il testo.", pok: "Prompt copiato.", pfb: "Copia il prompt.", pick: "Altra versione scelta. Premi Analizza.",
     mdl: (f, p) => `Scarico ${f} ${p}%`, aMdl: "Scarico modello...", aP: p => `Analisi AI ${p}%...`, aFail: "Analisi fallita.", gpuFb: "Uso CPU.", tP: (n, m) => `Analisi testo ${n}/${m}...`,
@@ -212,7 +278,6 @@ function applyLang() {
 }
 $("lang").onchange = e => { LANG = e.target.value; localStorage.setItem("mood.lang", LANG); applyLang(); };
 
-/* NORMALIZACIJA HRVATSKIH DIJAKRITIKA ZA PRETRAGU TEKSTA (š, ć, č, ž, đ) */
 function normalizeText(str) {
   if (!str) return "";
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -441,7 +506,6 @@ function workerCall(task, model, input, opts, gpu) {
   return new Promise((res, rej) => { const id = ++WID; WP[id] = { res, rej }; WKS[lane].postMessage({ id, task, model, input, opts, gpu }); });
 }
 
-/* OBOGAĆENI EMOCIONALNI RJEČNIK BEZ NEODREĐENIH STUPOVA */
 const EMO = {
   hr: { admiration: "divljenje", amusement: "zabava", anger: "ljutnja", annoyance: "iritacija", approval: "odobravanje", caring: "briga", confusion: "zbunjenost", curiosity: "znatiželja", desire: "želja", disappointment: "razočaranje", disapproval: "neodobravanje", disgust: "gađenje", embarrassment: "nelagoda", excitement: "uzbuđenje", fear: "strah", gratitude: "zahvalnost", grief: "žalost", joy: "radost", love: "ljubav", nervousness: "nemir", optimism: "optimizam", pride: "ponos", realization: "spoznaja", relief: "olakšanje", remorse: "kajanje", sadness: "tuga", surprise: "iznenađenje", longing: "čežnja", pain: "bol", nostalgia: "nostalgija" }
 };
@@ -455,7 +519,6 @@ function describe(s, inten, em) {
 }
 const valWord = s => T("val")[s > .55 ? 4 : s > .15 ? 3 : s > -.15 ? 2 : s > -.55 ? 1 : 0];
 
-/* PRECIZNIJE I RAZVRSTANIJE OZNAČAVANJE BEZ 'NEODREĐENO' */
 const lineLabel = l => {
   if (!l) return "";
   if (l.em && l.em[0] && l.em[0][0] !== "neutral") return emoName(l.em[0][0]);
@@ -478,7 +541,6 @@ async function scoreMany(task, model, arr, opts) {
 const DL = { Shout: 1, Yell: 1, Screaming: 1, Bellow: .6, Whispering: -1 };
 const VT = { "Male singing": "male", "Female singing": "female", "Child singing": "female", Choir: "choir", Rapping: "rap" };
 
-/* PRECIZNO SJEČENJE STIHOVA S BRŽIM KLIZANJEM PO FRAZAMA */
 function splitLine(text, en) {
   const ws = [...text.matchAll(/\S+/g)].map(m => ({ s: m.index, e: m.index + m[0].length, w: m[0], lw: m[0].toLowerCase().replace(/[^\p{L}']/gu, "") }));
   if (ws.length <= 3) return [text];
@@ -599,7 +661,6 @@ function fft(re, im) {
   }
 }
 
-/* REKALIBRIRANA AUDIO ANALIZA TONA ("KAKO ZVUČI") ZA BALADE I TUŽNE PJESME */
 async function analyzeAudio(file, deep, onReady) {
   const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
   const buf = await ctx.decodeAudioData(await file.arrayBuffer()); ctx.close();
@@ -652,7 +713,6 @@ async function analyzeAudio(file, deep, onReady) {
   let slow = null, sdl = null;
   if (A && A.length > 2) { slow = lerpA(z(A.map(p => p.v))); sdl = lerpA(z(A.map(p => p.dl))); }
   
-  // Prilagođeno ponderiranje: smanjen utjecaj samih visokih frekvencija da tužne balade ne odlete u visine
   const raw = TS.map((_, i) => slow ? 0.7 * slow[i] + 0.15 * zc[i] + 0.15 * ze[i] : 0.3 * zc[i] + 0.7 * ze[i]);
   const sm = smooth(raw, 3), mx = Math.max(...sm.map(Math.abs)) || 1;
   const us = smooth(TS.map((_, i) => slow ? Math.abs(slow[i] - (zc[i] + ze[i]) / 2) : Math.abs(zc[i] - ze[i]) / 2), 4);
@@ -688,7 +748,6 @@ function musicAt(t) {
 
 function lyricAt(t) { let r = null; for (const l of D.lyrics) { if (l.t <= t) r = l; else break; } return r; }
 
-/* KRETANJE PO BRZIM ISJEČCIMA STIHOVA */
 function lyricVal(t, f = "s") {
   const g = l => (l[f] == null ? (f === "s" ? 0 : 0.3) : l[f]);
   let i = -1; for (let j = 0; j < D.lyrics.length; j++) { if (D.lyrics[j].t <= t) i = j; else break; }
@@ -802,7 +861,6 @@ function draw() {
   }
   showLayers(cur);
 
-  /* POBOLJŠANA KALKULACIJA VERTIKALNOG METERA SINKRONIZACIJE (PUNJENJE TIK UZ POKLAPANJE) */
   const curDiff = cur ? Math.abs(mv.v - lyricVal(t)) : 1;
   const instantSync = Math.max(0, 1 - curDiff);
   
@@ -813,7 +871,6 @@ function draw() {
   }
   const avgSync = n ? Math.max(0, 1 - sum / n / 2) : 0;
   
-  // Kombinacija trenutnog presjeka (70%) i prosjeka (30%) za puni odaziv
   const finalSync = Math.round((0.7 * instantSync + 0.3 * avgSync) * 100);
   $("vMeterFill").style.height = `${Math.max(5, Math.min(100, finalSync))}%`;
 }
