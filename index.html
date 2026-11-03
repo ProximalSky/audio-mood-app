@@ -14,17 +14,11 @@
 <meta property="og:image" content="https://audio-mood-app.netlify.app/og-preview.png">
 <meta property="og:url" content="https://audio-mood-app.netlify.app/">
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Zvuči li kako se osjeća?">
-<meta name="twitter:description" content="Nalazi li se vaša omiljena pjesma u kontrastu između veselog ritma i tužnog teksta? Provjerite besplatno.">
-
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Structured Data (JSON-LD) for WebApplication -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -34,11 +28,7 @@
   "description": "Nalazi li se zvučna emocija pjesme u skladu s njezinim tekstom? Alat besplatno i lokalno analizira zvučni zapis i stihove te stvara usporedni grafikon raspoloženja.",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "All",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "EUR"
-  }
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
 }
 </script>
 
@@ -149,36 +139,19 @@
   #status { font-size:.85rem; color:#ffb3f1; min-height:1.3em; font-weight:500; }
   #stage[hidden] { display:none; }
 
-  /* FAQ sekcija */
   .faq-section { max-width: 800px; margin: 40px auto 0; padding: 24px; text-align: left; font-size: 0.92rem; line-height: 1.6; }
   .faq-section h2 { font-size: 1.25rem; color: #f0a6ff; margin-top: 0; margin-bottom: 16px; text-align: center; font-family: var(--sans); }
   .faq-item { margin-bottom: 16px; }
   .faq-item h3 { font-size: 0.98rem; color: var(--cyan); margin: 0 0 4px; font-weight: 600; }
   .faq-item p { margin: 0; color: var(--muted); }
 
-  /* Komentari sekcija */
   .comments-section { max-width: 800px; margin: 24px auto 0; padding: 24px; text-align: left; }
   .comments-section h2 { font-size: 1.25rem; color: #f0a6ff; margin-top: 0; margin-bottom: 16px; text-align: center; font-family: var(--sans); }
+  #commentSuccess { display:none; color: var(--cyan); text-align: center; font-weight: 600; margin-top: 12px; }
 </style>
 </head>
 <body>
 <div id="space"><div id="stars"></div></div>
-<!-- Sekcija za komentare (Netlify Forms) -->
-  <section class="comments-section">
-    <h2>Komentari i dojmovi</h2>
-    <form name="komentari" method="POST" data-netlify="true" style="display:grid; gap:12px; max-width:600px; margin:0 auto;">
-      <input type="hidden" name="form-name" value="komentari">
-      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
-        Vaše ime ili nadimak:
-        <input type="text" name="name" required placeholder="npr. Marko" style="margin-top:4px;">
-      </label>
-      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
-        Komentar:
-        <textarea name="message" rows="4" required placeholder="Napišite vaše mišljenje ili dojam o pjesmi..." style="margin-top:4px;"></textarea>
-      </label>
-      <button type="submit" class="action-btn">Objavi komentar</button>
-    </form>
-  </section>
 <main>
   <div class="langbar"><select id="lang"><option value="hr">Hrvatski</option><option value="en">English</option><option value="it">Italiano</option></select></div>
   <h1 data-i="title">Zvuči li kako se osjeća?</h1>
@@ -200,7 +173,6 @@
       <button id="mkPrompt" class="action-btn" data-i="mk" style="margin-bottom:12px;">Kopiraj prompt za Claude chat</button>
       <label><span data-i="fScore">Claudeove ocjene (JSON)</span><textarea id="scoreText" rows="4"></textarea></label>
 
-      <!-- Alat za konverziju audio datoteka -->
       <div class="converter-box">
         <h4>🔄 Pretvarač audio formata (Lokalno u WAV)</h4>
         <label><span>Odaberite datoteku za pretvorbu (ogg/flac/m4a/mp3)</span><input type="file" id="convertFile" accept="audio/*"></label>
@@ -258,7 +230,6 @@
     <audio id="player"></audio>
   </section>
 
-  <!-- FAQ sekcija -->
   <section class="faq-section">
     <h2>Kako alat funkcionira?</h2>
     
@@ -278,17 +249,22 @@
     </div>
   </section>
 
-  <!-- Sekcija za komentare (Cusdis) -->
+  <!-- Komentari (Netlify Forms) na samom dnu -->
   <section class="comments-section">
     <h2>Komentari i dojmovi</h2>
-    <div id="cusdis_thread"
-      data-host="https://cusdis.com"
-      data-app-id="AUDIO_MOOD_APP_CUSDIS_ID"
-      data-page-id="audio-mood-app-main"
-      data-page-url="https://audio-mood-app.netlify.app/"
-      data-page-title="Zvuči li kako se osjeća?"
-    ></div>
-    <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+    <form id="commentForm" name="komentari" method="POST" data-netlify="true" style="display:grid; gap:12px; max-width:600px; margin:0 auto;">
+      <input type="hidden" name="form-name" value="komentari">
+      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
+        Vaše ime ili nadimak:
+        <input type="text" name="name" required placeholder="npr. Marko" style="margin-top:4px;">
+      </label>
+      <label style="text-align:left; font-size:0.85rem; color:var(--muted);">
+        Komentar:
+        <textarea name="message" rows="4" required placeholder="Napišite vaše mišljenje ili dojam o pjesmi..." style="margin-top:4px;"></textarea>
+      </label>
+      <button type="submit" class="action-btn">Objavi komentar</button>
+    </form>
+    <div id="commentSuccess">Hvala vam na komentarima! Komentar je uspješno zaprimljen.</div>
   </section>
 </main>
 
@@ -322,15 +298,22 @@ function applyLang() {
 }
 $("lang").onchange = e => { LANG = e.target.value; localStorage.setItem("mood.lang", LANG); applyLang(); };
 
-function normalizeText(str) {
-  if (!str) return "";
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/đ/g, "d").replace(/Đ/g, "D")
-            .replace(/š/g, "s").replace(/Š/g, "S")
-            .replace(/ć/g, "c").replace(/Ć/g, "C")
-            .replace(/č/g, "c").replace(/Č/g, "C")
-            .replace(/ž/g, "z").replace(/Ž/g, "Z");
-}
+/* SLANJE KOMENTARA BEZ REFRESHA / CRASHA */
+$("commentForm").onsubmit = e => {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString()
+  }).then(() => {
+    form.style.display = "none";
+    $("commentSuccess").style.display = "block";
+  }).catch(() => {
+    alert("Došlo je do greške pri slanju komentara.");
+  });
+};
 
 /* LOKALNI ALAT ZA KONVERZIJU U WAV */
 $("convertBtn").onclick = async () => {
@@ -347,7 +330,6 @@ $("convertBtn").onclick = async () => {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     
-    // Konverzija AudioBuffer-a u WAV Blob
     const numOfChan = audioBuffer.numberOfChannels;
     const length = audioBuffer.length * numOfChan * 2 + 44;
     const outBuffer = new ArrayBuffer(length);
@@ -355,9 +337,7 @@ $("convertBtn").onclick = async () => {
     const channels = [];
     let sample, offset = 0, pos = 0;
 
-    function writeString(str) {
-      for (let i = 0; i < str.length; i++) view.setUint8(pos++, str.charCodeAt(i));
-    }
+    function writeString(str) { for (let i = 0; i < str.length; i++) view.setUint8(pos++, str.charCodeAt(i)); }
     function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
     function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
 
@@ -400,6 +380,16 @@ $("convertBtn").onclick = async () => {
     statusDiv.textContent = "Greška pri pretvorbi datoteke: " + err.message;
   }
 };
+
+function normalizeText(str) {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d").replace(/Đ/g, "D")
+            .replace(/š/g, "s").replace(/Š/g, "S")
+            .replace(/ć/g, "c").replace(/Ć/g, "C")
+            .replace(/č/g, "c").replace(/Č/g, "C")
+            .replace(/ž/g, "z").replace(/Ž/g, "Z");
+}
 
 const NS = "http://www.w3.org/2000/svg";
 const W = 700, H = 400, PAD = 8, WINDOW = 30, HEAD = 0.72;
