@@ -274,17 +274,17 @@ const I18N = {
   hr: { title: "Zvuči li kako se osjeća?", heroIntro: "Usporedite emociju zvuka i značenje teksta pjesme kroz vrijeme. Učitajte zvučni zapis i saznajte nalazi li se energija glazbe u skladu ili u kontrastu sa stihovima.", f1: "1. Odaberi pjesmu (mp3/wav)", f2: "2. Pretraga teksta (popuni se iz oznaka ili imena datoteke)", ph: "izvođač naslov", deep: "Točnija analiza zvuka (AI model, sporije)", gpu: "GPU ubrzanje (WebGPU)", go: "Analiziraj", manual: "Ručno / Dodatni alati", fLrc: "Učitaj .lrc datoteku", fText: "Tekst s vremenima (.lrc)", mk: "Kopiraj prompt za Claude chat", fScore: "Claudeove ocjene (JSON)", lm: "kako zvuči", lw: "što riječi kažu", bright: "SVIJETLIJE", dark: "TAMNIJE", split: "NAJVEĆI RAZMAK", factTitle: "Zanimljivost",
     noFile: "Prvo odaberi mp3.", an: "Analiziram zvuk...", srch: "Tražim tekst...", none: "Nema teksta s vremenima.", noL: "Fali tekst s vremenima.", err: "Greška: ",
     tags: (a, t) => `Iz datoteke: ${a || "?"} – ${t}`, noTags: "Nema metapodataka, koristim ime datoteke.", warn: d => `pazi: tekst odstupa ${d} s`, ptxt: "Prvo treba tekst.", pok: "Prompt kopiran.", pfb: "Kopiraj prompt iz polja.", pick: "Odabran drugi tekst. Klikni Analiziraj.",
-    mdl: (f, p) => `Skidam model ${f} ${p}%`, aMdl: "Skidam AI model...", aP: p => `AI analiza ${p}%...`, aFail: "AI analiza nije uspjela.", gpuFb: "GPU nedostupan, koristim CPU.", tP: (n, m) => `Analiza teksta ${n}/${m}...`,
+    mdl: (f, p) => `Skidam model ${f} ${p}%`, aMdl: "Skidam AI model...", aP: p => `AI analiza ${p}%...`, aFail: "Brza akustička analiza zvuka...", gpuFb: "GPU nedostupan, koristim CPU.", tP: (n, m) => `Analiza teksta ${n}/${m}...`,
     tone: ["duboko mračno", "tmurno", "dvosmisleno", "toplo", "izrazito svijetlo"], str: ["tiho", "umjereno", "snažno"], val: ["mračno", "teško", "sjetno", "toplo", "svijetlo"], with: "s primjesom", vs: "Vokalni stil", voice: { male: "muški vokal", female: "ženski vokal", choir: "zbor", rap: "rep" }, dyn: ["ujednačena dinamika", "umjerena dinamika", "široka dinamika"] },
   en: { title: "Does it sound the way it feels?", heroIntro: "Compare audio emotion against timed lyrics over time. Upload a track to see whether the music aligns with or contrasts the lyrics.", f1: "1. Choose a song (mp3/wav)", f2: "2. Lyrics search", ph: "artist title", deep: "Accurate audio analysis", gpu: "GPU acceleration", go: "Analyze", manual: "Manual / Extra tools", fLrc: "Load .lrc file", fText: "Timed lyrics (.lrc)", mk: "Copy prompt", fScore: "Scores JSON", lm: "how it sounds", lw: "what words say", bright: "BRIGHTER", dark: "DARKER", split: "BIGGEST SPLIT", factTitle: "Fun Fact",
     noFile: "Choose an mp3 first.", an: "Analyzing audio...", srch: "Searching lyrics...", none: "No timed lyrics found.", noL: "Timed lyrics missing.", err: "Error: ",
     tags: (a, t) => `From file: ${a || "?"} – ${t}`, noTags: "No tags found.", warn: d => `differs by ${d} s`, ptxt: "Timed lyrics needed.", pok: "Prompt copied.", pfb: "Copy prompt from box.", pick: "Selected. Click Analyze.",
-    mdl: (f, p) => `Downloading ${f} ${p}%`, aMdl: "Downloading model...", aP: p => `AI audio analysis ${p}%...`, aFail: "AI analysis failed.", gpuFb: "Using CPU.", tP: (n, m) => `Analyzing lyrics ${n}/${m}...`,
+    mdl: (f, p) => `Downloading ${f} ${p}%`, aMdl: "Downloading model...", aP: p => `AI audio analysis ${p}%...`, aFail: "Fast acoustic analysis...", gpuFb: "Using CPU.", tP: (n, m) => `Analyzing lyrics ${n}/${m}...`,
     tone: ["deeply dark", "gloomy", "ambiguous", "warm", "radiantly bright"], str: ["quietly", "moderately", "intensely"], val: ["dark", "heavy", "melancholic", "warm", "bright"], with: "with a hint of", vs: "Vocal style", voice: { male: "male vocal", female: "female vocal", choir: "choir", rap: "rap" }, dyn: ["even dynamics", "moderate dynamics", "wide dynamics"] },
   it: { title: "Suona come si sente?", heroIntro: "Confronta l'emozione dell'audio con il significato del testo nel tempo. Carica un brano e scopri se la musica è in sintonia o in contrasto con le parole.", f1: "1. Scegli un brano", f2: "2. Ricerca testo", ph: "artista titolo", deep: "Analisi audio precisa", gpu: "Accelerazione GPU", go: "Analizza", manual: "Manuale / Strumenti extra", fLrc: "Carica file .lrc", fText: "Testo con tempi (.lrc)", mk: "Copia prompt", fScore: "Punteggi JSON", lm: "come suona", lw: "cosa dicono le parole", bright: "PIÙ CHIARO", dark: "PIÙ SCURO", split: "MAGGIORE DIVARIO", factTitle: "Curiosità",
     noFile: "Scegli prima un mp3.", an: "Analizzo l'audio...", srch: "Cerco il testo...", none: "Nessun testo trovato.", noL: "Manca il testo.", err: "Errore: ",
     tags: (a, t) => `Dal file: ${a || "?"} – ${t}`, noTags: "Nessun tag.", warn: d => `differisce di ${d} s`, ptxt: "Serve prima il testo.", pok: "Prompt copiato.", pfb: "Copia il prompt.", pick: "Altra versione scelta. Premi Analizza.",
-    mdl: (f, p) => `Scarico ${f} ${p}%`, aMdl: "Scarico modello...", aP: p => `Analisi AI ${p}%...`, aFail: "Analisi fallita.", gpuFb: "Uso CPU.", tP: (n, m) => `Analisi testo ${n}/${m}...`,
+    mdl: (f, p) => `Scarico ${f} ${p}%`, aMdl: "Scarico modello...", aP: p => `Analisi AI ${p}%...`, aFail: "Analisi acustica veloce...", gpuFb: "Uso CPU.", tP: (n, m) => `Analisi testo ${n}/${m}...`,
     tone: ["profondamente cupo", "cupo", "ambiguo", "caldo", "radioso"], str: ["piano", "moderatamente", "intensamente"], val: ["cupo", "pesante", "malinconico", "caldo", "luminoso"], with: "con un tocco di", vs: "Stile vocale", voice: { male: "voce maschile", female: "voce femminile", choir: "coro", rap: "rap" }, dyn: ["dinamica uniforme", "dinamica moderata", "dinamica ampia"] }
 };
 let LANG = localStorage.getItem("mood.lang") || (navigator.language || "en").slice(0, 2);
@@ -298,7 +298,7 @@ function applyLang() {
 }
 $("lang").onchange = e => { LANG = e.target.value; localStorage.setItem("mood.lang", LANG); applyLang(); };
 
-/* SLANJE KOMENTARA BEZ REFRESHA / CRASHA */
+/* NETLIFY FORMS KOMENTARI */
 $("commentForm").onsubmit = e => {
   e.preventDefault();
   const form = e.target;
@@ -311,11 +311,11 @@ $("commentForm").onsubmit = e => {
     form.style.display = "none";
     $("commentSuccess").style.display = "block";
   }).catch(() => {
-    alert("Došlo je do greške pri slanju komentara.");
+    form.submit();
   });
 };
 
-/* LOKALNI ALAT ZA KONVERZIJU U WAV */
+/* PRETVARAČ U WAV */
 $("convertBtn").onclick = async () => {
   const fileInput = $("convertFile");
   const statusDiv = $("convertStatus");
